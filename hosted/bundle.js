@@ -309,7 +309,7 @@ var BuyDiamondsPage = function BuyDiamondsPage(props) {
               React.createElement('img', { src: '/assets/img/diamondsBkd.png' }),
               React.createElement(
                 'a',
-                { className: 'btn-floating btn-large halfway-fab waves-effect waves-light soft-blue', id: '100', onClick: handleBuyDiamonds },
+                { className: 'btn-floating btn-large halfway-fab waves-effect waves-light soft-blue pulse', id: '100', onClick: handleBuyDiamonds },
                 '$0.99'
               )
             ),
@@ -336,7 +336,7 @@ var BuyDiamondsPage = function BuyDiamondsPage(props) {
               React.createElement('img', { src: '/assets/img/diamondsBkd.png' }),
               React.createElement(
                 'a',
-                { className: 'btn-floating btn-large halfway-fab waves-effect waves-light soft-blue', id: '400', onClick: handleBuyDiamonds },
+                { className: 'btn-floating btn-large halfway-fab waves-effect waves-light soft-blue pulse', id: '400', onClick: handleBuyDiamonds },
                 '$3.49'
               )
             ),
@@ -363,7 +363,7 @@ var BuyDiamondsPage = function BuyDiamondsPage(props) {
               React.createElement('img', { src: '/assets/img/diamondsBkd.png' }),
               React.createElement(
                 'a',
-                { className: 'btn-floating btn-large halfway-fab waves-effect waves-light soft-blue', id: '2000', onClick: handleBuyDiamonds },
+                { className: 'btn-floating btn-large halfway-fab waves-effect waves-light soft-blue pulse', id: '2000', onClick: handleBuyDiamonds },
                 '$14.99'
               )
             ),
@@ -401,6 +401,25 @@ var increaseMaxFighters = function increaseMaxFighters(e) {
   return false;
 };
 
+var startFight = function startFight(e) {
+  // console.dir(e.target.id);
+  // console.dir(e.target.parentElement.parentElement.title);
+  var ourFighter = e.target.parentElement.parentElement.title.split("-");
+  var theirFighter = e.target.id.split("-");
+
+  console.dir(ourFighter);
+  console.dir(theirFighter);
+
+  var csrf = $("#_csrf").val();
+  var form = 'fighterName1=' + ourFighter[0];
+  form = form + '&fighterId1=' + ourFighter[1];
+  form = form + '&fighterName2=' + theirFighter[0];
+  form = form + '&fighterId2=' + theirFighter[1];
+  form = form + '&_csrf=' + csrf;
+
+  sendAjax('POST', '/fight', '' + form, redirect);
+};
+
 /// Renders all fighters owned by player
 var YourFighterList = function YourFighterList(props) {
   if (props.fighters.length === 0) {
@@ -415,17 +434,6 @@ var YourFighterList = function YourFighterList(props) {
       React.createElement('input', { type: 'hidden', id: '_csrf', name: '_csrf', value: props.csrf })
     );
   }
-
-  // const fighterNodes = props.fighters.map(function(fighter) {
-  //   return (
-  //     <div key={fighter._id} className="fighter">
-  //       <h3 className="fighterName"> Name: {fighter.name} </h3>
-  //       <h3 className="fighterHealth"> Health: {fighter.health} </h3>
-  //       <h3 className="fighterDamage"> Damage: {fighter.damage} </h3>
-  //       <input type="submit" className="waves-effect waves-purple btn" value="Delete Fighter" name={fighter.name} onClick={handleDeleteClick} />
-  //     </div>
-  //   );
-  // });
 
   var fighterNodes = props.fighters.map(function (fighter) {
     return React.createElement(
@@ -513,7 +521,27 @@ var AllFighterList = function AllFighterList(props) {
     );
   }
 
+  var yourFighterNodes = props.yourFighters.map(function (fighter) {
+    var id = fighter.name + '-' + fighter.account;
+    return React.createElement(
+      'li',
+      null,
+      React.createElement(
+        'a',
+        { href: '#', id: id, onClick: startFight },
+        fighter.name
+      )
+    );
+  });
+
+  var i = 0;
   var fighterNodes = props.fighters.map(function (fighter) {
+    // have to use some sort of iterator to key each dropdown lists ids, otherwise some dropdowns
+    // might refer to a random different dropdown
+    i++;
+    var dropdownId = 'dropdown' + i + '-' + fighter.account;
+    var title = fighter.name + '-' + fighter.account;
+
     return React.createElement(
       'div',
       { key: fighter._id, className: 'fighter' },
@@ -567,9 +595,19 @@ var AllFighterList = function AllFighterList(props) {
               'Crit Chance: ',
               fighter.crit * 2,
               '%'
+            ),
+            React.createElement('br', null),
+            React.createElement(
+              'a',
+              { className: 'dropdown-trigger btn-floating btn-large soft-violet waves-effect waves-light', 'data-target': dropdownId },
+              'Fight'
+            ),
+            React.createElement(
+              'ul',
+              { id: dropdownId, title: title, className: 'dropdown-content' },
+              yourFighterNodes
             )
-          ),
-          React.createElement('div', { className: 'card-action' })
+          )
         )
       )
     );
@@ -594,7 +632,13 @@ var loadFightersFromServer = function loadFightersFromServer() {
 var loadAllFightersFromServer = function loadAllFightersFromServer() {
   var csrf = $("#_csrf").val();
   sendAjax('GET', '/getAllFighters', null, function (data) {
-    ReactDOM.render(React.createElement(AllFighterList, { fighters: data.fighters, csrf: csrf }), document.querySelector("#content"));
+    sendAjax('GET', '/getFighters', null, function (accountData) {
+      ReactDOM.render(React.createElement(AllFighterList, { fighters: data.fighters, yourFighters: accountData.fighters, csrf: csrf }), document.querySelector("#content"));
+
+      // set up materialize elements
+      $('.dropdown-trigger').dropdown();
+      $('.modal').modal();
+    });
   });
 };
 
@@ -649,7 +693,7 @@ var setupAccountPage = function setupAccountPage(csrf) {
     ReactDOM.render(React.createElement(AccountForm, { csrf: csrf, maxFighters: result.maxFighters }), document.querySelector("#content"));
 
     // initialize materialize elements
-    $('.collapsible').collapsible();
+    // $('.collapsible').collapsible();
   });
 
   updateUrl('/account');

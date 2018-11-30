@@ -220,7 +220,7 @@ const BuyDiamondsPage = (props) => {
             <div className="card">
               <div className="card-image">
                 <img src="/assets/img/diamondsBkd.png"></img>
-                <a className="btn-floating btn-large halfway-fab waves-effect waves-light soft-blue" id="100" onClick={handleBuyDiamonds}>$0.99</a>
+                <a className="btn-floating btn-large halfway-fab waves-effect waves-light soft-blue pulse" id="100" onClick={handleBuyDiamonds}>$0.99</a>
               </div>
               <div className="card-title card-content">
                 <p>100 Diamonds</p>
@@ -231,7 +231,7 @@ const BuyDiamondsPage = (props) => {
             <div className="card">
               <div className="card-image">
                 <img src="/assets/img/diamondsBkd.png"></img>
-                <a className="btn-floating btn-large halfway-fab waves-effect waves-light soft-blue" id="400" onClick={handleBuyDiamonds}>$3.49</a>
+                <a className="btn-floating btn-large halfway-fab waves-effect waves-light soft-blue pulse" id="400" onClick={handleBuyDiamonds}>$3.49</a>
               </div>
               <div className="card-title card-content">
                 <p>400 Diamonds</p>
@@ -242,7 +242,7 @@ const BuyDiamondsPage = (props) => {
             <div className="card">
               <div className="card-image">
                 <img src="/assets/img/diamondsBkd.png"></img>
-                <a className="btn-floating btn-large halfway-fab waves-effect waves-light soft-blue" id="2000" onClick={handleBuyDiamonds}>$14.99</a>
+                <a className="btn-floating btn-large halfway-fab waves-effect waves-light soft-blue pulse" id="2000" onClick={handleBuyDiamonds}>$14.99</a>
               </div>
               <div className="card-title card-content">
                 <p>2000 Diamonds</p>
@@ -273,6 +273,25 @@ const increaseMaxFighters = (e) => {
   return false;
 };
 
+const startFight = (e) => {
+  // console.dir(e.target.id);
+  // console.dir(e.target.parentElement.parentElement.title);
+  const ourFighter = e.target.parentElement.parentElement.title.split("-");
+  const theirFighter = e.target.id.split("-");
+  
+  console.dir(ourFighter);
+  console.dir(theirFighter);
+  
+  const csrf = $("#_csrf").val();
+  let form = `fighterName1=${ourFighter[0]}`;
+  form = `${form}&fighterId1=${ourFighter[1]}`;
+  form = `${form}&fighterName2=${theirFighter[0]}`;
+  form = `${form}&fighterId2=${theirFighter[1]}`;
+  form = `${form}&_csrf=${csrf}`;
+  
+  sendAjax('POST', '/fight', `${form}`, redirect);
+};
+
 /// Renders all fighters owned by player
 const YourFighterList = function(props) {
   if(props.fighters.length === 0) {
@@ -283,17 +302,6 @@ const YourFighterList = function(props) {
       </div>
     );
   }
-  
-  // const fighterNodes = props.fighters.map(function(fighter) {
-  //   return (
-  //     <div key={fighter._id} className="fighter">
-  //       <h3 className="fighterName"> Name: {fighter.name} </h3>
-  //       <h3 className="fighterHealth"> Health: {fighter.health} </h3>
-  //       <h3 className="fighterDamage"> Damage: {fighter.damage} </h3>
-  //       <input type="submit" className="waves-effect waves-purple btn" value="Delete Fighter" name={fighter.name} onClick={handleDeleteClick} />
-  //     </div>
-  //   );
-  // });
   
   const fighterNodes = props.fighters.map(function(fighter) {
     return (
@@ -335,12 +343,26 @@ const AllFighterList = function(props) {
     );
   }
   
+  const yourFighterNodes = props.yourFighters.map(function(fighter) {
+    const id = `${fighter.name}-${fighter.account}`;
+    return (
+      <li><a href="#" id={id} onClick={startFight}>{fighter.name}</a></li>
+    );
+  });
+  
+  let i = 0;  
   const fighterNodes = props.fighters.map(function(fighter) {
+    // have to use some sort of iterator to key each dropdown lists ids, otherwise some dropdowns
+    // might refer to a random different dropdown
+    i++;
+    const dropdownId = `dropdown${i}-${fighter.account}`;
+    const title = `${fighter.name}-${fighter.account}`;
+    
     return (
       <div key={fighter._id} className="fighter">
         <div className="col s3 m3">
           <div className="card dark-purple lighten-1">
-            <div className="card-content white-text">
+            <div className="card-content white-text" >
               <span className="card-title">{fighter.name}</span>
               <p id="accountField">Created By {fighter.username}</p>
               <p>Health: {fighter.health}</p>
@@ -348,9 +370,13 @@ const AllFighterList = function(props) {
               <p>Speed: {fighter.speed}</p>
               <p>Armor: {fighter.armor}</p>
               <p>Crit Chance: {fighter.crit * 2}%</p>
-            </div>
-            <div className="card-action">
-              {/*<a name={fighter.name} onClick={handleDeleteClick}>Delete Fighter</a>*/}
+              <br></br>
+              <a className="dropdown-trigger btn-floating btn-large soft-violet waves-effect waves-light" data-target={dropdownId}>Fight</a>
+              
+              <ul id={dropdownId} title={title} className='dropdown-content'>
+                {yourFighterNodes}
+              </ul>
+                          
             </div>
           </div>
         </div>      
@@ -380,10 +406,17 @@ const loadFightersFromServer = () => {
 const loadAllFightersFromServer = () => {
   let csrf = $("#_csrf").val();
   sendAjax('GET', '/getAllFighters', null, (data) => {
-    ReactDOM.render(
-      <AllFighterList fighters={data.fighters} csrf={csrf} />,
-      document.querySelector("#content")
-    );
+    sendAjax('GET', '/getFighters', null, (accountData) => {
+      ReactDOM.render(
+        <AllFighterList fighters={data.fighters} yourFighters={accountData.fighters} csrf={csrf} />,
+        document.querySelector("#content")
+      );
+      
+      // set up materialize elements
+      $('.dropdown-trigger').dropdown();
+      $('.modal').modal();
+      
+    });
   });
 };
 
@@ -450,7 +483,7 @@ const setupAccountPage = function(csrf) {
     );
     
     // initialize materialize elements
-    $('.collapsible').collapsible();
+    // $('.collapsible').collapsible();
   });
   
   updateUrl('/account');

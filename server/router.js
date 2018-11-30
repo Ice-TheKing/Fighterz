@@ -22,7 +22,9 @@ const router = (app) => {
   app.get('/maker', mid.requiresLogin, controllers.Fighter.makerPage);
   app.post('/maker', mid.requiresLogin, controllers.Fighter.make);
   app.post('/deleteFighter', mid.requiresLogin, controllers.Fighter.deleteFighter);
+  app.post('/fight', mid.requiresLogin, mid.requiresSecure, controllers.Battle.runFight);
   app.get('/', mid.requiresSecure, mid.requiresLogout, controllers.Account.loginPage);
+  app.get('/*', mid.requiresSecure, mid.requiresLogout, controllers.Account.loginPage);
 };
 
 module.exports = router;
