@@ -83,10 +83,10 @@ FighterSchema.statics.toAPI = (doc) => ({
 
 FighterSchema.statics.findByNameId = (name, accountId, callback) => {
   const search = {
-    name: name,
+    name,
     account: convertId(accountId),
   };
-  
+
   return FighterModel.findOne(search, callback);
   //  .select('account username name health damage speed armor crit')
   //  .exec(callback);
