@@ -11,6 +11,11 @@ body {
     padding: 0;
 }
 
+a {
+  text-decoration: inherit;
+  color: inherit;
+}
+
 a:hover {
   cursor: pointer;
 }
@@ -43,6 +48,12 @@ ul {
     margin-right: 10px;
     text-align: right;
     font-size: 1.2em;
+}
+
+.card {
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
 }
 
 .card:hover {

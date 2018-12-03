@@ -23,10 +23,12 @@
     "Node",
     "MVC",
     "Redis",
-    "Login"
+    "MongoDB",
+    "Login",
+    "Fighterz"
   ],
   "author": "Mychael B Hunt",
-  "license": "Apache 2.0",
+  "license": "ISC",
   "dependencies": {
     "body-parser": "^1.15.0",
     "compression": "^1.6.1",

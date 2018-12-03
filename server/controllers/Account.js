@@ -74,7 +74,7 @@ const signup = (request, response) => {
   }
 
   if (req.body.pass !== req.body.pass2) {
-    return res.status(400).json({ error: 'Passwords do not match!' });
+    return res.status(400).json({ error: 'Passwords do not match' });
   }
 
   return Account.AccountModel.generateHash(req.body.pass, (salt, hash) => {

@@ -10,18 +10,77 @@ const critMultiplier = 1.5;
 // add 1 to sides because since this is Math.floor, sides is exclusive
 const roll = (sides) => Math.floor(Math.random() * sides + 1);
 
-// / rolls a random value between -sides and sides
+// rolls a random value between -sides and sides
 const deviate = (sides) => (Math.floor(Math.random() * (sides * 2) + 1)) - sides;
+
+// handles all updates to database objects for the end of a fight
+// including gaining xp, leveling up, increasing battles/wins/kills stats etc
+const handleGameEnd = (wnr, lsr, log, callback) => {
+  let winner = wnr;
+  let loser = lsr;  
+  let battleLog = log;
+  
+  // check to see if the match was a death match
+  let deathMatch = false;
+  if(winner.level > 4 && loser.level > 4) {
+    deathMatch = true;
+  }
+  
+  // TODO: check to see if loser dies
+  
+  // give each fighter some xp
+  // You get 1/yourlevel * opponents level xp * 5
+  // so in an equal match, winner gets 5 xp, loser gets 1
+  // and if you fight a level 2 as a level 5 and win, you get 2 xp
+  // and they get 2.5xp
+  // benefit for fighting a higher level is capped at a 5 level difference
+  const winnerxp = (Math.min((1/winner.level * loser.level), 5) * 5);
+  const loserxp = ((1/loser.level * Math.min(winner.level, 5)) * 1);
+  winner.xp += winnerxp;
+  loser.xp += loserxp;
+  
+  battleLog.push(`${winner.name} has earned ${winnerxp}xp`);
+  battleLog.push(`${loser.name} has earned ${loserxp}xp`);
+  
+  // check to see if they leveled up
+  // this is a while loop in case somehow they leveled up a bunch of times
+  while(winner.xp > winner.xpToNext) {
+    winner.xp -= winner.xpToNext;
+    winner.level += 1;
+    winner.levelupPts += 1;
+    winner.xpToNext = Math.floor(winner.xpToNext * 1.4);
+  }
+  while(loser.xp > loser.xpToNext) {
+    loser.xp -= loser.xpToNext;
+    loser.level += 1;
+    loser.levelupPts += 1;
+    loser.xpToNext = Math.floor(loser.xpToNext * 1.4);
+  }
+  
+  // increase num fights and wins
+  winner.wins += 1;
+  winner.fights += 1;
+  loser.fights += 1;
+  
+  // update database
+  const winnerPromise = winner.save();
+  winnerPromise.then(() => {
+    const loserPromise = loser.save();
+    loserPromise.then(() => {
+      // all good. Both are saved
+      return callback();
+    });
+  });
+};
 
 // returns how much damage is blocked given attacker damage and defender armor
 const runArmor = (dmg, arm) => {
   const damage = dmg;
-  const armor = Math.max(arm, 0);
+  const armor = Math.max(arm, 1);
 
   // make sure armor is a min of 1.
   // cause if they figure out how to get negative armor,
-  // they could have like a 2,400%
-  // chance to block damage lol
+  // they could have like a 2,400% chance to block damage lol
 
   // I'm running a y = x / ((1/m)x + (1/a)) function to approach m but never go above it.
   // 'a' just changes how the curve of the function goes
@@ -31,11 +90,10 @@ const runArmor = (dmg, arm) => {
   // as 'a' increases, the initial slope of the graph is higher
   // So right now it is approaching a 95% chance to block damage. I think a 95%
   // chance at infinity armor is pretty good.
-  // That means it won't get into 99%s or anything like that. Deal 100 damage and
-  // only ~1 goes through. That would suck lmfao
-  // x is our armor value. (just wanted to state the obvious just in case lol)
+  // That means it won't get into 99% or anything like that. Deal 100 damage and
+  // only ~1 goes through. That would suck lmfao (not that anyone will get infinity armor)
 
-  // right to get this graph, just google 'graph (x / ((1/95)x + (1/5)))'
+  // To visualize this graph, just google 'graph (x / ((1/95)x + (1/5)))'
   // so at 15, the max they can set from the beginning, chance to block
   // every point of damage is about 42%
   // chance at 50 is 68%
@@ -54,6 +112,7 @@ const runArmor = (dmg, arm) => {
   return damageBlocked;
 };
 
+// run a single attack round given an attacker and defender
 const battleRound = (attk, dfnd, battleLog) => {
   const attacker = attk;
   const defender = dfnd;
@@ -61,6 +120,9 @@ const battleRound = (attk, dfnd, battleLog) => {
   // roll damage for attacker
   // damage can deviate by 5 on either side (15 damage can hit from 10 to 20)
   let damage = attacker.damage + deviate(5);
+  // It'd be cool to make this a percentage deviation. So if someone had 1000 damage, 
+  // it won't just deviate by 5, and will deviate by a number that scales well 
+  // to higher stats
 
   // make sure the damage is at least 1
   damage = Math.max(damage, 1);
@@ -91,11 +153,14 @@ const battleRound = (attk, dfnd, battleLog) => {
   );
 };
 
+// just a really quick helper function to see if a given fighter is dead
 const isDead = (fighter) => {
   if (fighter.tempHealth < 1) { return true; }
   return false;
 };
 
+// direct call to server function. Starts off the entire fight between two fighters
+// returns the result, and updates the fighter objects in the database.
 const runFight = (request, response) => {
   const req = request;
   const res = response;
@@ -149,7 +214,7 @@ const runFight = (request, response) => {
         // but the order will always go: higher roll, lower roll,
         // rest of the rounds from higher roll
 
-        while (speed1 !== speed2) { // can't have the same speed. If they line up, roll again
+        while (true) { // can't have same speed. Keep looping till they find different vals
           if (speed1 > speed2) {
             attacker = fighter1;
             defender = fighter2;
@@ -174,9 +239,11 @@ const runFight = (request, response) => {
 
         battleLog.push(`${attacker.name} will go first`);
         battleLog.push(`${defender.name} will go second`);
+        
+        // If the attacker goes more than 2 times, push that to the log.
         if (turns > 2) {
           battleLog.push(`${attacker.name} will then attack another ${turns - 1} times`);
-        } else if (turns === 2) { // damn english language. 'will go 1 times' nah
+        } else if (turns === 2) { // damn english language. 'will go another 1 times' nah
           battleLog.push(`${attacker.name} will then attack 1 more time`);
         }
 
@@ -188,7 +255,7 @@ const runFight = (request, response) => {
         if (isDead(defender)) {
           winner = attacker;
           loser = defender;
-          battleLog.push(`${winner.name} has defeated ${loser.name}`);
+          battleLog.push(`${winner.name} defeated ${loser.name}`);
           break;
         }
 
@@ -199,7 +266,7 @@ const runFight = (request, response) => {
         if (isDead(attacker)) {
           winner = defender;
           loser = attacker;
-          battleLog.push(`${winner.name} has defeated ${loser.name}`);
+          battleLog.push(`${winner.name} defeated ${loser.name}`);
           break;
         }
 
@@ -211,7 +278,7 @@ const runFight = (request, response) => {
           if (isDead(defender)) {
             winner = attacker;
             loser = defender;
-            battleLog.push(`${winner.name} has defeated ${loser.name}`);
+            battleLog.push(`${winner.name} defeated ${loser.name}`);
             break;
           }
         }
@@ -219,7 +286,10 @@ const runFight = (request, response) => {
 
       console.dir(battleLog);
       if (winner && loser) {
-        return res.json({ message: `${winner.name} defeated ${loser.name}` });
+        // update the winner and loser
+        return handleGameEnd(winner, loser, battleLog, () => {
+          return res.json({ message: `${winner.name} defeated ${loser.name}` });
+        });
       }
 
       return res.json({ error: 'An error occurred' });

@@ -279,9 +279,6 @@ const startFight = (e) => {
   const ourFighter = e.target.parentElement.parentElement.title.split("-");
   const theirFighter = e.target.id.split("-");
   
-  console.dir(ourFighter);
-  console.dir(theirFighter);
-  
   const csrf = $("#_csrf").val();
   let form = `fighterName1=${ourFighter[0]}`;
   form = `${form}&fighterId1=${ourFighter[1]}`;
@@ -310,6 +307,10 @@ const YourFighterList = function(props) {
           <div className="card dark-purple lighten-1">
             <div className="card-content white-text">
               <span className="card-title">{fighter.name}</span>
+              <p>Level {fighter.level}</p>
+              <p>xp: {fighter.xp.toFixed(1)}/{fighter.xpToNext}</p>
+              <p>Fights: {fighter.fights}</p>
+              <p>Wins: {fighter.wins}</p>
               <p>Health: {fighter.health}</p>
               <p>Damage: {fighter.damage}</p>
               <p>Speed: {fighter.speed}</p>
@@ -345,8 +346,9 @@ const AllFighterList = function(props) {
   
   const yourFighterNodes = props.yourFighters.map(function(fighter) {
     const id = `${fighter.name}-${fighter.account}`;
+    const itemName = `${fighter.name} - ${fighter.level}`;
     return (
-      <li><a href="#" id={id} onClick={startFight}>{fighter.name}</a></li>
+      <li><a href="#" id={id} onClick={startFight}>{itemName}</a></li>
     );
   });
   
@@ -358,11 +360,15 @@ const AllFighterList = function(props) {
     const dropdownId = `dropdown${i}-${fighter.account}`;
     const title = `${fighter.name}-${fighter.account}`;
     
+    // for setting up each card as a modal
+    const modalhref = `modal${i}`;
+    const modalhrefId = `#${modalhref}`;
+    
     return (
       <div key={fighter._id} className="fighter">
         <div className="col s3 m3">
           <div className="card dark-purple lighten-1">
-            <div className="card-content white-text" >
+            <div className="card-content white-text" ><a className="modal-trigger" href={modalhrefId}>
               <span className="card-title">{fighter.name}</span>
               <p id="accountField">Created By {fighter.username}</p>
               <p>Health: {fighter.health}</p>
@@ -372,14 +378,32 @@ const AllFighterList = function(props) {
               <p>Crit Chance: {fighter.crit * 2}%</p>
               <br></br>
               <a className="dropdown-trigger btn-floating btn-large soft-violet waves-effect waves-light" data-target={dropdownId}>Fight</a>
-              
               <ul id={dropdownId} title={title} className='dropdown-content'>
                 {yourFighterNodes}
               </ul>
-                          
+            </a></div>
+            <div id={modalhref} className="modal">
+              <div className="modal-content card-content dark-purple lighten-1 white-text">
+                  <span className="card-title">{fighter.name}</span>
+                  <p id="accountField">Created By {fighter.username}</p>
+                  <p>Level {fighter.level}</p>
+                  <p>xp: {fighter.xp.toFixed(1)}/{fighter.xpToNext}</p>
+                  <p>Fights: {fighter.fights}</p>
+                  <p>Wins: {fighter.wins}</p><br></br>
+                  <p>Health: {fighter.health}</p>
+                  <p>Damage: {fighter.damage}</p>
+                  <p>Speed: {fighter.speed}</p>
+                  <p>Armor: {fighter.armor}</p>
+                  <p>Crit Chance: {fighter.crit * 2}%</p>
+                  <br></br>
+                  <a className="dropdown-trigger btn-floating btn-large soft-violet waves-effect waves-light" data-target={dropdownId}>Fight</a>
+                  <ul id={dropdownId} title={title} className='dropdown-content'>
+                    {yourFighterNodes}
+                  </ul>
+              </div>
             </div>
           </div>
-        </div>      
+        </div>
       </div>
     );
   });

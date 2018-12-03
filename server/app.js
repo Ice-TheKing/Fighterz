@@ -12,7 +12,7 @@ const url = require('url');
 const csrf = require('csurf');
 
 const port = process.env.PORT || process.env.NODE_PORT || 3000;
-const dbURL = process.env.MONGODB_URI || 'mongodb://localhost/FighterMaker';
+const dbURL = process.env.MONGODB_URI || 'mongodb://localhost/Fighterz';
 
 mongoose.connect(dbURL, (err) => {
   if (err) {

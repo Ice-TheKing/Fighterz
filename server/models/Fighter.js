@@ -22,8 +22,12 @@ const FighterSchema = new mongoose.Schema({
     min: 0,
     required: true,
   },
-
-  // TODO: make max health, so characters have to heal over time
+  
+  maxHealth: {
+    type: Number,
+    min: 0,
+    required: true,
+  },
 
   damage: {
     type: Number,
@@ -44,6 +48,54 @@ const FighterSchema = new mongoose.Schema({
   },
 
   crit: {
+    type: Number,
+    min: 0,
+    required: true,
+  },
+  
+  xp: {
+    type: Number,
+    min: 0,
+    required: true,
+  },
+  
+  xpToNext: {
+    type: Number,
+    min: 1,
+    required: true,
+  },
+  
+  fights: {
+    type: Number,
+    min: 0,
+    required: true,
+  },
+  
+  wins: {
+    type: Number,
+    min: 0,
+    required: true,
+  },
+  
+  kills: {
+    type: Number,
+    min: 0,
+    required: true,
+  },
+  
+  level: {
+    type: Number,
+    min: 1,
+    required: true,
+  },
+  
+  levelupPts: {
+    type: Number,
+    min: 0,
+    required: true,
+  },
+  
+  revivals: {
     type: Number,
     min: 0,
     required: true,
@@ -96,16 +148,49 @@ FighterSchema.statics.findByAccount = (accountId, callback) => {
   const search = {
     account: convertId(accountId),
   };
+  let selection = `account`;
+  selection = `${selection} username`;
+  selection = `${selection} name`;
+  selection = `${selection} health`;
+  selection = `${selection} damage`;
+  selection = `${selection} speed`;
+  selection = `${selection} armor`;
+  selection = `${selection} crit`;
+  selection = `${selection} level`;
+  selection = `${selection} xp`;
+  selection = `${selection} xpToNext`;
+  selection = `${selection} wins`;
+  selection = `${selection} fights`;
+  selection = `${selection} kills`;
+  selection = `${selection} revivals`;
+  selection = `${selection} levelupPts`;
 
   return FighterModel.find(search)
-    .select('account username name health damage speed armor crit')
+    .select(selection)
     .exec(callback);
 };
 
 FighterSchema.statics.findAll = (callback) => {
   const search = { };
+  let selection = `account`;
+  selection = `${selection} username`;
+  selection = `${selection} name`;
+  selection = `${selection} health`;
+  selection = `${selection} damage`;
+  selection = `${selection} speed`;
+  selection = `${selection} armor`;
+  selection = `${selection} crit`;
+  selection = `${selection} level`;
+  selection = `${selection} xp`;
+  selection = `${selection} xpToNext`;
+  selection = `${selection} wins`;
+  selection = `${selection} fights`;
+  selection = `${selection} kills`;
+  selection = `${selection} revivals`;
+  selection = `${selection} levelupPts`;
+  
   return FighterModel.find(search)
-    .select('account username name health damage speed armor crit')
+    .select(selection)
     .limit(400)
     .exec(callback);
 };

@@ -78,12 +78,24 @@ const deleteFighter = (request, response) => {
 const makeFighter = (req, res) => {
   // cast everything as a number (except name of course)
   const name = req.body.name;
+  
+  /* STATS */
   const health = Number(req.body.health);
+  const maxHealth = Number(req.body.health);
   const damage = Number(req.body.damage);
   const speed = Number(req.body.speed);
   const armor = Number(req.body.armor);
   const crit = Number(req.body.crit);
-  // console.log(req.session.username);
+  
+  /* INFO */
+  const level = 1;
+  const levelupPts = 0;
+  const xp = 0;
+  const xpToNext = 12;
+  const wins = 0;
+  const fights = 0;
+  const kills = 0;
+  const revivals = 0;
 
   if (!name || !health || !damage || !speed || !armor || !crit) {
     return res.status(400).json({ error: 'All fighter stats required' });
@@ -91,6 +103,10 @@ const makeFighter = (req, res) => {
 
   if (health + damage + speed + armor + crit > 36) {
     return res.status(400).json({ error: 'stats must not exceed 36' });
+  }
+  
+  if(name.length > 25) {
+    return res.status(400).json({ error: 'fighter name must not exceed 25 characters' });
   }
 
   // check how many fighters the account has
@@ -116,10 +132,19 @@ const makeFighter = (req, res) => {
     const fighterData = {
       name,
       health,
+      maxHealth,
       damage,
       speed,
       armor,
       crit,
+      level,
+      levelupPts,
+      xp,
+      xpToNext,
+      wins,
+      fights,
+      kills,
+      revivals,
       username: req.session.username,
       account: req.session.account._id,
     };

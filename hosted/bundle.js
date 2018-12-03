@@ -407,9 +407,6 @@ var startFight = function startFight(e) {
   var ourFighter = e.target.parentElement.parentElement.title.split("-");
   var theirFighter = e.target.id.split("-");
 
-  console.dir(ourFighter);
-  console.dir(theirFighter);
-
   var csrf = $("#_csrf").val();
   var form = 'fighterName1=' + ourFighter[0];
   form = form + '&fighterId1=' + ourFighter[1];
@@ -452,6 +449,32 @@ var YourFighterList = function YourFighterList(props) {
               'span',
               { className: 'card-title' },
               fighter.name
+            ),
+            React.createElement(
+              'p',
+              null,
+              'Level ',
+              fighter.level
+            ),
+            React.createElement(
+              'p',
+              null,
+              'xp: ',
+              fighter.xp.toFixed(1),
+              '/',
+              fighter.xpToNext
+            ),
+            React.createElement(
+              'p',
+              null,
+              'Fights: ',
+              fighter.fights
+            ),
+            React.createElement(
+              'p',
+              null,
+              'Wins: ',
+              fighter.wins
             ),
             React.createElement(
               'p',
@@ -523,13 +546,14 @@ var AllFighterList = function AllFighterList(props) {
 
   var yourFighterNodes = props.yourFighters.map(function (fighter) {
     var id = fighter.name + '-' + fighter.account;
+    var itemName = fighter.name + ' - ' + fighter.level;
     return React.createElement(
       'li',
       null,
       React.createElement(
         'a',
         { href: '#', id: id, onClick: startFight },
-        fighter.name
+        itemName
       )
     );
   });
@@ -541,6 +565,10 @@ var AllFighterList = function AllFighterList(props) {
     i++;
     var dropdownId = 'dropdown' + i + '-' + fighter.account;
     var title = fighter.name + '-' + fighter.account;
+
+    // for setting up each card as a modal
+    var modalhref = 'modal' + i;
+    var modalhrefId = '#' + modalhref;
 
     return React.createElement(
       'div',
@@ -555,57 +583,149 @@ var AllFighterList = function AllFighterList(props) {
             'div',
             { className: 'card-content white-text' },
             React.createElement(
-              'span',
-              { className: 'card-title' },
-              fighter.name
-            ),
-            React.createElement(
-              'p',
-              { id: 'accountField' },
-              'Created By ',
-              fighter.username
-            ),
-            React.createElement(
-              'p',
-              null,
-              'Health: ',
-              fighter.health
-            ),
-            React.createElement(
-              'p',
-              null,
-              'Damage: ',
-              fighter.damage
-            ),
-            React.createElement(
-              'p',
-              null,
-              'Speed: ',
-              fighter.speed
-            ),
-            React.createElement(
-              'p',
-              null,
-              'Armor: ',
-              fighter.armor
-            ),
-            React.createElement(
-              'p',
-              null,
-              'Crit Chance: ',
-              fighter.crit * 2,
-              '%'
-            ),
-            React.createElement('br', null),
-            React.createElement(
               'a',
-              { className: 'dropdown-trigger btn-floating btn-large soft-violet waves-effect waves-light', 'data-target': dropdownId },
-              'Fight'
-            ),
+              { className: 'modal-trigger', href: modalhrefId },
+              React.createElement(
+                'span',
+                { className: 'card-title' },
+                fighter.name
+              ),
+              React.createElement(
+                'p',
+                { id: 'accountField' },
+                'Created By ',
+                fighter.username
+              ),
+              React.createElement(
+                'p',
+                null,
+                'Health: ',
+                fighter.health
+              ),
+              React.createElement(
+                'p',
+                null,
+                'Damage: ',
+                fighter.damage
+              ),
+              React.createElement(
+                'p',
+                null,
+                'Speed: ',
+                fighter.speed
+              ),
+              React.createElement(
+                'p',
+                null,
+                'Armor: ',
+                fighter.armor
+              ),
+              React.createElement(
+                'p',
+                null,
+                'Crit Chance: ',
+                fighter.crit * 2,
+                '%'
+              ),
+              React.createElement('br', null),
+              React.createElement(
+                'a',
+                { className: 'dropdown-trigger btn-floating btn-large soft-violet waves-effect waves-light', 'data-target': dropdownId },
+                'Fight'
+              ),
+              React.createElement(
+                'ul',
+                { id: dropdownId, title: title, className: 'dropdown-content' },
+                yourFighterNodes
+              )
+            )
+          ),
+          React.createElement(
+            'div',
+            { id: modalhref, className: 'modal' },
             React.createElement(
-              'ul',
-              { id: dropdownId, title: title, className: 'dropdown-content' },
-              yourFighterNodes
+              'div',
+              { className: 'modal-content card-content dark-purple lighten-1 white-text' },
+              React.createElement(
+                'span',
+                { className: 'card-title' },
+                fighter.name
+              ),
+              React.createElement(
+                'p',
+                { id: 'accountField' },
+                'Created By ',
+                fighter.username
+              ),
+              React.createElement(
+                'p',
+                null,
+                'Level ',
+                fighter.level
+              ),
+              React.createElement(
+                'p',
+                null,
+                'xp: ',
+                fighter.xp.toFixed(1),
+                '/',
+                fighter.xpToNext
+              ),
+              React.createElement(
+                'p',
+                null,
+                'Fights: ',
+                fighter.fights
+              ),
+              React.createElement(
+                'p',
+                null,
+                'Wins: ',
+                fighter.wins
+              ),
+              React.createElement('br', null),
+              React.createElement(
+                'p',
+                null,
+                'Health: ',
+                fighter.health
+              ),
+              React.createElement(
+                'p',
+                null,
+                'Damage: ',
+                fighter.damage
+              ),
+              React.createElement(
+                'p',
+                null,
+                'Speed: ',
+                fighter.speed
+              ),
+              React.createElement(
+                'p',
+                null,
+                'Armor: ',
+                fighter.armor
+              ),
+              React.createElement(
+                'p',
+                null,
+                'Crit Chance: ',
+                fighter.crit * 2,
+                '%'
+              ),
+              React.createElement('br', null),
+              React.createElement(
+                'a',
+                { className: 'dropdown-trigger btn-floating btn-large soft-violet waves-effect waves-light', 'data-target': dropdownId },
+                'Fight'
+              ),
+              React.createElement(
+                'ul',
+                { id: dropdownId, title: title, className: 'dropdown-content' },
+                yourFighterNodes
+              )
             )
           )
         )
