@@ -78,7 +78,7 @@ const deleteFighter = (request, response) => {
 const makeFighter = (req, res) => {
   // cast everything as a number (except name of course)
   const name = req.body.name;
-  
+
   /* STATS */
   const health = Number(req.body.health);
   const maxHealth = Number(req.body.health);
@@ -86,7 +86,7 @@ const makeFighter = (req, res) => {
   const speed = Number(req.body.speed);
   const armor = Number(req.body.armor);
   const crit = Number(req.body.crit);
-  
+
   /* INFO */
   const level = 1;
   const levelupPts = 0;
@@ -104,8 +104,8 @@ const makeFighter = (req, res) => {
   if (health + damage + speed + armor + crit > 36) {
     return res.status(400).json({ error: 'stats must not exceed 36' });
   }
-  
-  if(name.length > 25) {
+
+  if (name.length > 25) {
     return res.status(400).json({ error: 'fighter name must not exceed 25 characters' });
   }
 

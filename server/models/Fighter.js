@@ -22,7 +22,7 @@ const FighterSchema = new mongoose.Schema({
     min: 0,
     required: true,
   },
-  
+
   maxHealth: {
     type: Number,
     min: 0,
@@ -52,49 +52,49 @@ const FighterSchema = new mongoose.Schema({
     min: 0,
     required: true,
   },
-  
+
   xp: {
     type: Number,
     min: 0,
     required: true,
   },
-  
+
   xpToNext: {
     type: Number,
     min: 1,
     required: true,
   },
-  
+
   fights: {
     type: Number,
     min: 0,
     required: true,
   },
-  
+
   wins: {
     type: Number,
     min: 0,
     required: true,
   },
-  
+
   kills: {
     type: Number,
     min: 0,
     required: true,
   },
-  
+
   level: {
     type: Number,
     min: 1,
     required: true,
   },
-  
+
   levelupPts: {
     type: Number,
     min: 0,
     required: true,
   },
-  
+
   revivals: {
     type: Number,
     min: 0,
@@ -148,7 +148,7 @@ FighterSchema.statics.findByAccount = (accountId, callback) => {
   const search = {
     account: convertId(accountId),
   };
-  let selection = `account`;
+  let selection = 'account';
   selection = `${selection} username`;
   selection = `${selection} name`;
   selection = `${selection} health`;
@@ -172,7 +172,7 @@ FighterSchema.statics.findByAccount = (accountId, callback) => {
 
 FighterSchema.statics.findAll = (callback) => {
   const search = { };
-  let selection = `account`;
+  let selection = 'account';
   selection = `${selection} username`;
   selection = `${selection} name`;
   selection = `${selection} health`;
@@ -188,7 +188,7 @@ FighterSchema.statics.findAll = (callback) => {
   selection = `${selection} kills`;
   selection = `${selection} revivals`;
   selection = `${selection} levelupPts`;
-  
+
   return FighterModel.find(search)
     .select(selection)
     .limit(400)

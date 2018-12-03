@@ -16,60 +16,59 @@ const deviate = (sides) => (Math.floor(Math.random() * (sides * 2) + 1)) - sides
 // handles all updates to database objects for the end of a fight
 // including gaining xp, leveling up, increasing battles/wins/kills stats etc
 const handleGameEnd = (wnr, lsr, log, callback) => {
-  let winner = wnr;
-  let loser = lsr;  
-  let battleLog = log;
-  
+  const winner = wnr;
+  const loser = lsr;
+  const battleLog = log;
+
   // check to see if the match was a death match
-  let deathMatch = false;
-  if(winner.level > 4 && loser.level > 4) {
-    deathMatch = true;
+  // let deathMatch = false;
+  if (winner.level > 4 && loser.level > 4) {
+    // deathMatch = true;
   }
-  
+
   // TODO: check to see if loser dies
-  
+
   // give each fighter some xp
   // You get 1/yourlevel * opponents level xp * 5
   // so in an equal match, winner gets 5 xp, loser gets 1
   // and if you fight a level 2 as a level 5 and win, you get 2 xp
   // and they get 2.5xp
   // benefit for fighting a higher level is capped at a 5 level difference
-  const winnerxp = (Math.min((1/winner.level * loser.level), 5) * 5);
-  const loserxp = ((1/loser.level * Math.min(winner.level, 5)) * 1);
+  const winnerxp = (Math.min((1 / winner.level * loser.level), 5) * 5);
+  const loserxp = ((1 / loser.level * Math.min(winner.level, 5)) * 1);
   winner.xp += winnerxp;
   loser.xp += loserxp;
-  
+
   battleLog.push(`${winner.name} has earned ${winnerxp}xp`);
   battleLog.push(`${loser.name} has earned ${loserxp}xp`);
-  
+
   // check to see if they leveled up
   // this is a while loop in case somehow they leveled up a bunch of times
-  while(winner.xp > winner.xpToNext) {
+  while (winner.xp > winner.xpToNext) {
     winner.xp -= winner.xpToNext;
     winner.level += 1;
     winner.levelupPts += 1;
     winner.xpToNext = Math.floor(winner.xpToNext * 1.4);
   }
-  while(loser.xp > loser.xpToNext) {
+  while (loser.xp > loser.xpToNext) {
     loser.xp -= loser.xpToNext;
     loser.level += 1;
     loser.levelupPts += 1;
     loser.xpToNext = Math.floor(loser.xpToNext * 1.4);
   }
-  
+
   // increase num fights and wins
   winner.wins += 1;
   winner.fights += 1;
   loser.fights += 1;
-  
+
   // update database
   const winnerPromise = winner.save();
   winnerPromise.then(() => {
     const loserPromise = loser.save();
-    loserPromise.then(() => {
+    loserPromise.then(() =>
       // all good. Both are saved
-      return callback();
-    });
+       callback());
   });
 };
 
@@ -120,8 +119,8 @@ const battleRound = (attk, dfnd, battleLog) => {
   // roll damage for attacker
   // damage can deviate by 5 on either side (15 damage can hit from 10 to 20)
   let damage = attacker.damage + deviate(5);
-  // It'd be cool to make this a percentage deviation. So if someone had 1000 damage, 
-  // it won't just deviate by 5, and will deviate by a number that scales well 
+  // It'd be cool to make this a percentage deviation. So if someone had 1000 damage,
+  // it won't just deviate by 5, and will deviate by a number that scales well
   // to higher stats
 
   // make sure the damage is at least 1
@@ -239,7 +238,7 @@ const runFight = (request, response) => {
 
         battleLog.push(`${attacker.name} will go first`);
         battleLog.push(`${defender.name} will go second`);
-        
+
         // If the attacker goes more than 2 times, push that to the log.
         if (turns > 2) {
           battleLog.push(`${attacker.name} will then attack another ${turns - 1} times`);
@@ -287,9 +286,8 @@ const runFight = (request, response) => {
       console.dir(battleLog);
       if (winner && loser) {
         // update the winner and loser
-        return handleGameEnd(winner, loser, battleLog, () => {
-          return res.json({ message: `${winner.name} defeated ${loser.name}` });
-        });
+        return handleGameEnd(winner, loser, battleLog,
+                             () => res.json({ message: `${winner.name} defeated ${loser.name}` }));
       }
 
       return res.json({ error: 'An error occurred' });
