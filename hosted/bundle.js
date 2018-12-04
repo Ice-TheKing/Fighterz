@@ -406,8 +406,8 @@ var startFight = function startFight(e) {
   // console.dir(e.target.parentElement.parentElement.title);
   var ourFighter = e.target.parentElement.parentElement.title.split("-");
   var theirFighter = e.target.id.split("-");
-
   var csrf = $("#_csrf").val();
+
   var form = 'fighterName1=' + ourFighter[0];
   form = form + '&fighterId1=' + ourFighter[1];
   form = form + '&fighterName2=' + theirFighter[0];
@@ -415,6 +415,26 @@ var startFight = function startFight(e) {
   form = form + '&_csrf=' + csrf;
 
   sendAjax('POST', '/fight', '' + form, redirect);
+};
+
+var handleUpgrade = function handleUpgrade(e) {
+  // console.dir(e.target.id);
+  // format for id is 'fighterName-stat'
+  // so we just have to split it to get the pieces of the form
+  var nameStat = e.target.id.split("-");
+  var name = nameStat[0];
+  var stat = nameStat[1];
+  var csrf = $("#_csrf").val();
+
+  var form = 'name=' + name;
+  form = form + '&stat=' + stat;
+  form = form + '&_csrf=' + csrf;
+  // console.dir(`name: ${name} account:${acct} stat: ${stat}`);
+
+  // send the ajax
+  sendAjax('POST', '/upgradeFighter', '' + form, function () {
+    loadFightersFromServer();
+  });
 };
 
 /// Renders all fighters owned by player
@@ -433,93 +453,219 @@ var YourFighterList = function YourFighterList(props) {
   }
 
   var fighterNodes = props.fighters.map(function (fighter) {
-    return React.createElement(
-      'div',
-      { key: fighter._id, className: 'fighter' },
-      React.createElement(
+    // check to see if the fighter has level up points available
+    if (fighter.levelupPts > 0) {
+      // ids for upgrading stats
+      var healthId = fighter.name + '-health';
+      var damageId = fighter.name + '-damage';
+      var speedId = fighter.name + '-speed';
+      var armorId = fighter.name + '-armor';
+      var critId = fighter.name + '-crit';
+      // displayed as the fighter level, so the user knows how many points they have to spend
+      var fighterLevel = fighter.level - fighter.levelupPts + ' + ' + fighter.levelupPts;
+      return React.createElement(
         'div',
-        { className: 'col s12 m12' },
+        { key: fighter._id, className: 'fighter' },
         React.createElement(
           'div',
-          { className: 'card dark-purple lighten-1' },
+          { className: 'col s12 m12' },
           React.createElement(
             'div',
-            { className: 'card-content white-text' },
+            { className: 'card dark-purple lighten-1' },
             React.createElement(
-              'span',
-              { className: 'card-title' },
-              fighter.name
+              'div',
+              { className: 'card-content white-text' },
+              React.createElement(
+                'span',
+                { className: 'card-title' },
+                fighter.name
+              ),
+              React.createElement(
+                'p',
+                null,
+                'Level ',
+                fighterLevel
+              ),
+              React.createElement(
+                'p',
+                null,
+                'xp: ',
+                fighter.xp.toFixed(1),
+                '/',
+                fighter.xpToNext
+              ),
+              React.createElement(
+                'p',
+                null,
+                'Wins: ',
+                fighter.wins
+              ),
+              React.createElement(
+                'p',
+                null,
+                'Fights: ',
+                fighter.fights
+              ),
+              React.createElement('br', null),
+              React.createElement(
+                'p',
+                null,
+                'Health: ',
+                fighter.health,
+                React.createElement(
+                  'i',
+                  { id: healthId, className: 'tiny material-icons upgradebtn', onClick: handleUpgrade },
+                  'add'
+                )
+              ),
+              React.createElement(
+                'p',
+                null,
+                'Damage: ',
+                fighter.damage,
+                React.createElement(
+                  'i',
+                  { id: damageId, className: 'tiny material-icons upgradebtn', onClick: handleUpgrade },
+                  'add'
+                )
+              ),
+              React.createElement(
+                'p',
+                null,
+                'Speed: ',
+                fighter.speed,
+                React.createElement(
+                  'i',
+                  { id: speedId, className: 'tiny material-icons upgradebtn', onClick: handleUpgrade },
+                  'add'
+                )
+              ),
+              React.createElement(
+                'p',
+                null,
+                'Armor: ',
+                fighter.armor,
+                React.createElement(
+                  'i',
+                  { id: armorId, className: 'tiny material-icons upgradebtn', onClick: handleUpgrade },
+                  'add'
+                )
+              ),
+              React.createElement(
+                'p',
+                null,
+                'Crit Chance: ',
+                fighter.crit * 2,
+                '% ',
+                React.createElement(
+                  'i',
+                  { id: critId, className: 'tiny material-icons upgradebtn', onClick: handleUpgrade },
+                  'add'
+                )
+              )
             ),
             React.createElement(
-              'p',
-              null,
-              'Level ',
-              fighter.level
-            ),
-            React.createElement(
-              'p',
-              null,
-              'xp: ',
-              fighter.xp.toFixed(1),
-              '/',
-              fighter.xpToNext
-            ),
-            React.createElement(
-              'p',
-              null,
-              'Fights: ',
-              fighter.fights
-            ),
-            React.createElement(
-              'p',
-              null,
-              'Wins: ',
-              fighter.wins
-            ),
-            React.createElement(
-              'p',
-              null,
-              'Health: ',
-              fighter.health
-            ),
-            React.createElement(
-              'p',
-              null,
-              'Damage: ',
-              fighter.damage
-            ),
-            React.createElement(
-              'p',
-              null,
-              'Speed: ',
-              fighter.speed
-            ),
-            React.createElement(
-              'p',
-              null,
-              'Armor: ',
-              fighter.armor
-            ),
-            React.createElement(
-              'p',
-              null,
-              'Crit Chance: ',
-              fighter.crit * 2,
-              '%'
-            )
-          ),
-          React.createElement(
-            'div',
-            { className: 'card-action' },
-            React.createElement(
-              'a',
-              { name: fighter.name, onClick: handleDeleteClick },
-              'Delete Fighter'
+              'div',
+              { className: 'card-action' },
+              React.createElement(
+                'a',
+                { name: fighter.name, onClick: handleDeleteClick },
+                'Delete Fighter'
+              )
             )
           )
         )
-      )
-    );
+      );
+    } else {
+      return React.createElement(
+        'div',
+        { key: fighter._id, className: 'fighter' },
+        React.createElement(
+          'div',
+          { className: 'col s12 m12' },
+          React.createElement(
+            'div',
+            { className: 'card dark-purple lighten-1' },
+            React.createElement(
+              'div',
+              { className: 'card-content white-text' },
+              React.createElement(
+                'span',
+                { className: 'card-title' },
+                fighter.name
+              ),
+              React.createElement(
+                'p',
+                null,
+                'Level ',
+                fighter.level
+              ),
+              React.createElement(
+                'p',
+                null,
+                'xp: ',
+                fighter.xp.toFixed(1),
+                '/',
+                fighter.xpToNext
+              ),
+              React.createElement(
+                'p',
+                null,
+                'Wins: ',
+                fighter.wins
+              ),
+              React.createElement(
+                'p',
+                null,
+                'Fights: ',
+                fighter.fights
+              ),
+              React.createElement('br', null),
+              React.createElement(
+                'p',
+                null,
+                'Health: ',
+                fighter.health
+              ),
+              React.createElement(
+                'p',
+                null,
+                'Damage: ',
+                fighter.damage
+              ),
+              React.createElement(
+                'p',
+                null,
+                'Speed: ',
+                fighter.speed
+              ),
+              React.createElement(
+                'p',
+                null,
+                'Armor: ',
+                fighter.armor
+              ),
+              React.createElement(
+                'p',
+                null,
+                'Crit Chance: ',
+                fighter.crit * 2,
+                '%'
+              )
+            ),
+            React.createElement(
+              'div',
+              { className: 'card-action' },
+              React.createElement(
+                'a',
+                { name: fighter.name, onClick: handleDeleteClick },
+                'Delete Fighter'
+              )
+            )
+          )
+        )
+      );
+    }
   });
 
   return React.createElement(
@@ -578,66 +724,51 @@ var AllFighterList = function AllFighterList(props) {
         { className: 'col s3 m3' },
         React.createElement(
           'div',
-          { className: 'card dark-purple lighten-1' },
+          { className: 'card clickable dark-purple lighten-1' },
           React.createElement(
             'div',
-            { className: 'card-content white-text' },
+            { className: 'card-content white-text modal-trigger', href: modalhrefId },
             React.createElement(
-              'a',
-              { className: 'modal-trigger', href: modalhrefId },
-              React.createElement(
-                'span',
-                { className: 'card-title' },
-                fighter.name
-              ),
-              React.createElement(
-                'p',
-                { id: 'accountField' },
-                'Created By ',
-                fighter.username
-              ),
-              React.createElement(
-                'p',
-                null,
-                'Health: ',
-                fighter.health
-              ),
-              React.createElement(
-                'p',
-                null,
-                'Damage: ',
-                fighter.damage
-              ),
-              React.createElement(
-                'p',
-                null,
-                'Speed: ',
-                fighter.speed
-              ),
-              React.createElement(
-                'p',
-                null,
-                'Armor: ',
-                fighter.armor
-              ),
-              React.createElement(
-                'p',
-                null,
-                'Crit Chance: ',
-                fighter.crit * 2,
-                '%'
-              ),
-              React.createElement('br', null),
-              React.createElement(
-                'a',
-                { className: 'dropdown-trigger btn-floating btn-large soft-violet waves-effect waves-light', 'data-target': dropdownId },
-                'Fight'
-              ),
-              React.createElement(
-                'ul',
-                { id: dropdownId, title: title, className: 'dropdown-content' },
-                yourFighterNodes
-              )
+              'span',
+              { className: 'card-title' },
+              fighter.name
+            ),
+            React.createElement(
+              'p',
+              { id: 'accountField' },
+              'Created By ',
+              fighter.username
+            ),
+            React.createElement(
+              'p',
+              null,
+              'Health: ',
+              fighter.health
+            ),
+            React.createElement(
+              'p',
+              null,
+              'Damage: ',
+              fighter.damage
+            ),
+            React.createElement(
+              'p',
+              null,
+              'Speed: ',
+              fighter.speed
+            ),
+            React.createElement(
+              'p',
+              null,
+              'Armor: ',
+              fighter.armor
+            ),
+            React.createElement(
+              'p',
+              null,
+              'Crit Chance: ',
+              fighter.crit * 2,
+              '%'
             )
           ),
           React.createElement(
@@ -674,14 +805,14 @@ var AllFighterList = function AllFighterList(props) {
               React.createElement(
                 'p',
                 null,
-                'Fights: ',
-                fighter.fights
+                'Wins: ',
+                fighter.wins
               ),
               React.createElement(
                 'p',
                 null,
-                'Wins: ',
-                fighter.wins
+                'Fights: ',
+                fighter.fights
               ),
               React.createElement('br', null),
               React.createElement(
@@ -736,6 +867,12 @@ var AllFighterList = function AllFighterList(props) {
   return React.createElement(
     'div',
     { className: 'fighterList row' },
+    React.createElement(
+      'h5',
+      { className: 'emptyFighter' },
+      'Click a Fighter to fight, or view more info'
+    ),
+    React.createElement('br', null),
     fighterNodes,
     React.createElement('input', { type: 'hidden', id: '_csrf', name: '_csrf', value: props.csrf })
   );

@@ -5,6 +5,7 @@ const Fighter = models.Fighter;
 
 // battle variables
 const critMultiplier = 1.5;
+const xpRamp = 1.2;
 
 // rolls a random value between 0 and sides
 // add 1 to sides because since this is Math.floor, sides is exclusive
@@ -48,13 +49,13 @@ const handleGameEnd = (wnr, lsr, log, callback) => {
     winner.xp -= winner.xpToNext;
     winner.level += 1;
     winner.levelupPts += 1;
-    winner.xpToNext = Math.floor(winner.xpToNext * 1.4);
+    winner.xpToNext = Math.floor(winner.xpToNext * xpRamp);
   }
   while (loser.xp > loser.xpToNext) {
     loser.xp -= loser.xpToNext;
     loser.level += 1;
     loser.levelupPts += 1;
-    loser.xpToNext = Math.floor(loser.xpToNext * 1.4);
+    loser.xpToNext = Math.floor(loser.xpToNext * xpRamp);
   }
 
   // increase num fights and wins

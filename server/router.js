@@ -23,6 +23,7 @@ const router = (app) => {
   app.post('/maker', mid.requiresLogin, controllers.Fighter.make);
   app.post('/deleteFighter', mid.requiresLogin, controllers.Fighter.deleteFighter);
   app.post('/fight', mid.requiresLogin, mid.requiresSecure, controllers.Battle.runFight);
+  app.post('/upgradeFighter', mid.requiresLogin, mid.requiresSecure, controllers.Fighter.upgradeFighter);
   app.get('/', mid.requiresSecure, mid.requiresLogout, controllers.Account.loginPage);
   app.get('/*', mid.requiresSecure, mid.requiresLogout, controllers.Account.loginPage);
 };

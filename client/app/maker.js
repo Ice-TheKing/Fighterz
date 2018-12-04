@@ -278,8 +278,8 @@ const startFight = (e) => {
   // console.dir(e.target.parentElement.parentElement.title);
   const ourFighter = e.target.parentElement.parentElement.title.split("-");
   const theirFighter = e.target.id.split("-");
-  
   const csrf = $("#_csrf").val();
+  
   let form = `fighterName1=${ourFighter[0]}`;
   form = `${form}&fighterId1=${ourFighter[1]}`;
   form = `${form}&fighterName2=${theirFighter[0]}`;
@@ -287,6 +287,26 @@ const startFight = (e) => {
   form = `${form}&_csrf=${csrf}`;
   
   sendAjax('POST', '/fight', `${form}`, redirect);
+};
+
+const handleUpgrade = (e) => {
+  // console.dir(e.target.id);
+  // format for id is 'fighterName-stat'
+  // so we just have to split it to get the pieces of the form
+  const nameStat = e.target.id.split("-");
+  const name = nameStat[0];
+  const stat = nameStat[1];
+  const csrf = $("#_csrf").val();
+  
+  let form = `name=${name}`;
+  form = `${form}&stat=${stat}`;
+  form = `${form}&_csrf=${csrf}`;
+  // console.dir(`name: ${name} account:${acct} stat: ${stat}`);
+  
+  // send the ajax
+  sendAjax('POST', '/upgradeFighter', `${form}`, () => {
+    loadFightersFromServer();
+  });
 };
 
 /// Renders all fighters owned by player
@@ -301,6 +321,42 @@ const YourFighterList = function(props) {
   }
   
   const fighterNodes = props.fighters.map(function(fighter) {
+    // check to see if the fighter has level up points available
+    if(fighter.levelupPts > 0) {
+      // ids for upgrading stats
+      const healthId = `${fighter.name}-health`;
+      const damageId = `${fighter.name}-damage`;
+      const speedId = `${fighter.name}-speed`;
+      const armorId = `${fighter.name}-armor`;
+      const critId = `${fighter.name}-crit`;
+      // displayed as the fighter level, so the user knows how many points they have to spend
+      const fighterLevel = `${fighter.level-fighter.levelupPts} + ${fighter.levelupPts}`;
+    return (
+      <div key={fighter._id} className="fighter">
+        <div className="col s12 m12">
+          <div className="card dark-purple lighten-1">
+            <div className="card-content white-text">
+              <span className="card-title">{fighter.name}</span>
+              <p>Level {fighterLevel}</p>
+              <p>xp: {fighter.xp.toFixed(1)}/{fighter.xpToNext}</p>
+              <p>Wins: {fighter.wins}{/*({(100*fighter.wins/fighter.fights).toFixed(1)}%)*/}</p>
+              <p>Fights: {fighter.fights}</p>
+              <br></br>
+              <p>Health: {fighter.health}<i id={healthId} className="tiny material-icons upgradebtn" onClick={handleUpgrade}>add</i></p>
+              <p>Damage: {fighter.damage}<i id={damageId} className="tiny material-icons upgradebtn" onClick={handleUpgrade}>add</i></p>
+              <p>Speed: {fighter.speed}<i id={speedId} className="tiny material-icons upgradebtn" onClick={handleUpgrade}>add</i></p>
+              <p>Armor: {fighter.armor}<i id={armorId} className="tiny material-icons upgradebtn" onClick={handleUpgrade}>add</i></p>
+              <p>Crit Chance: {fighter.crit * 2}% <i id={critId} className="tiny material-icons upgradebtn" onClick={handleUpgrade}>add</i></p>
+            </div>
+            <div className="card-action">
+              <a name={fighter.name} onClick={handleDeleteClick}>Delete Fighter</a>
+            </div>
+          </div>
+        </div>      
+      </div>
+    );
+    }
+    else {
     return (
       <div key={fighter._id} className="fighter">
         <div className="col s12 m12">
@@ -309,8 +365,9 @@ const YourFighterList = function(props) {
               <span className="card-title">{fighter.name}</span>
               <p>Level {fighter.level}</p>
               <p>xp: {fighter.xp.toFixed(1)}/{fighter.xpToNext}</p>
+              <p>Wins: {fighter.wins}{/*({(100*fighter.wins/fighter.fights).toFixed(1)}%)*/}</p>
               <p>Fights: {fighter.fights}</p>
-              <p>Wins: {fighter.wins}</p>
+              <br></br>
               <p>Health: {fighter.health}</p>
               <p>Damage: {fighter.damage}</p>
               <p>Speed: {fighter.speed}</p>
@@ -324,6 +381,7 @@ const YourFighterList = function(props) {
         </div>      
       </div>
     );
+    }
   });
   
   return (
@@ -367,8 +425,8 @@ const AllFighterList = function(props) {
     return (
       <div key={fighter._id} className="fighter">
         <div className="col s3 m3">
-          <div className="card dark-purple lighten-1">
-            <div className="card-content white-text" ><a className="modal-trigger" href={modalhrefId}>
+          <div className="card clickable dark-purple lighten-1">
+            <div className="card-content white-text modal-trigger" href={modalhrefId}>
               <span className="card-title">{fighter.name}</span>
               <p id="accountField">Created By {fighter.username}</p>
               <p>Health: {fighter.health}</p>
@@ -376,20 +434,20 @@ const AllFighterList = function(props) {
               <p>Speed: {fighter.speed}</p>
               <p>Armor: {fighter.armor}</p>
               <p>Crit Chance: {fighter.crit * 2}%</p>
-              <br></br>
+              {/*<br></br>
               <a className="dropdown-trigger btn-floating btn-large soft-violet waves-effect waves-light" data-target={dropdownId}>Fight</a>
-              <ul id={dropdownId} title={title} className='dropdown-content'>
-                {yourFighterNodes}
-              </ul>
-            </a></div>
+                <ul id={dropdownId} title={title} className='dropdown-content'>
+                  {yourFighterNodes}
+                </ul>*/}
+            </div>
             <div id={modalhref} className="modal">
               <div className="modal-content card-content dark-purple lighten-1 white-text">
                   <span className="card-title">{fighter.name}</span>
                   <p id="accountField">Created By {fighter.username}</p>
                   <p>Level {fighter.level}</p>
                   <p>xp: {fighter.xp.toFixed(1)}/{fighter.xpToNext}</p>
-                  <p>Fights: {fighter.fights}</p>
-                  <p>Wins: {fighter.wins}</p><br></br>
+                  <p>Wins: {fighter.wins}{/*({(100*fighter.wins/fighter.fights).toFixed(1)}%)*/}</p>
+                  <p>Fights: {fighter.fights}</p><br></br>
                   <p>Health: {fighter.health}</p>
                   <p>Damage: {fighter.damage}</p>
                   <p>Speed: {fighter.speed}</p>
@@ -410,6 +468,7 @@ const AllFighterList = function(props) {
   
   return (
     <div className="fighterList row">
+        <h5 className="emptyFighter">Click a Fighter to fight, or view more info</h5><br></br>
       {fighterNodes}
       <input type="hidden" id="_csrf" name="_csrf" value={props.csrf} />
     </div>

@@ -125,7 +125,7 @@ const makeFighter = (req, res) => {
     if (account.numFighters >= account.maxFighters) {
       return res.status(400).json({
         error: `You hit your fighter limit. Delete one of your existing fighters 
-        to create a new one, or purchase an additional slot from the account page`,
+        to create a new one, or purchase an additional slot from the Account page`,
       });
     }
 
@@ -184,6 +184,47 @@ const makeFighter = (req, res) => {
   });
 };
 
+const upgradeFighter = (req, res) => {
+  const request = req;
+  const response = res;
+  
+  // get each piece
+  const name = req.body.name;
+  const acct = req.session.account._id;
+  const stat = req.body.stat;
+  // console.dir(`name:${name} acct:${acct} stat:${stat}`);
+  
+  // get the fighter
+  return Fighter.FighterModel.findByNameId(name, acct, (err, fght) => {
+    if(err) {
+      console.log(err);
+      return res.status(400).json({ error: 'An error occurred' });
+    }
+    const fighter = fght;
+    
+    // check if the fighter has upgrade points available
+    if(fighter.levelupPts < 1) {
+      return res.status(400).json({ error: 'No upgrades available' });
+    }
+    
+    fighter[stat] += 1; // upgrade the stat they want
+    fighter.levelupPts -= 1; // they used a level up point
+    
+    const fighterPromise = fighter.save();
+    
+    fighterPromise.then(() => {
+      return res.json({  });
+    });
+    
+    fighterPromise.catch((er) => {
+      return res.status(400).json({ error: 'An error occurred' });
+    });
+    
+    return fighterPromise;
+  });
+};
+
+module.exports.upgradeFighter = upgradeFighter;
 module.exports.makerPage = makerPage;
 module.exports.getFighters = getFighters;
 module.exports.getAllFighters = getAllFighters;
