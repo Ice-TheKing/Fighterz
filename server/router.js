@@ -18,10 +18,13 @@ const router = (app) => {
   app.get('/getMaxFighters', mid.requiresLogin, mid.requiresSecure,
           controllers.Account.getMaxFighters);
   app.get('/getDiamonds', mid.requiresLogin, mid.requiresSecure, controllers.Account.getDiamonds);
+  app.get('/getRevivals', mid.requiresLogin, mid.requiresSecure, controllers.Account.getRevivals);
   app.post('/addDiamonds', mid.requiresLogin, mid.requiresSecure, controllers.Account.addDiamonds);
+  app.post('/addRevivals', mid.requiresLogin, mid.requiresSecure, controllers.Account.addRevivals);
   app.get('/maker', mid.requiresLogin, controllers.Fighter.makerPage);
   app.post('/maker', mid.requiresLogin, controllers.Fighter.make);
   app.post('/deleteFighter', mid.requiresLogin, controllers.Fighter.deleteFighter);
+  app.post('/reviveFighter', mid.requiresLogin, controllers.Fighter.reviveFighter);
   app.post('/fight', mid.requiresLogin, mid.requiresSecure, controllers.Battle.runFight);
   app.post('/upgradeFighter', mid.requiresLogin, mid.requiresSecure, controllers.Fighter.upgradeFighter);
   app.get('/', mid.requiresSecure, mid.requiresLogout, controllers.Account.loginPage);

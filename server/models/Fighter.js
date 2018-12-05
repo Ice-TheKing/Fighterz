@@ -152,6 +152,7 @@ FighterSchema.statics.findByAccount = (accountId, callback) => {
   selection = `${selection} username`;
   selection = `${selection} name`;
   selection = `${selection} health`;
+  selection = `${selection} maxHealth`;
   selection = `${selection} damage`;
   selection = `${selection} speed`;
   selection = `${selection} armor`;
@@ -176,6 +177,7 @@ FighterSchema.statics.findAll = (callback) => {
   selection = `${selection} username`;
   selection = `${selection} name`;
   selection = `${selection} health`;
+  selection = `${selection} maxHealth`;
   selection = `${selection} damage`;
   selection = `${selection} speed`;
   selection = `${selection} armor`;

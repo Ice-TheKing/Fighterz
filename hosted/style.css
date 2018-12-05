@@ -29,8 +29,14 @@ ul {
   margin: auto;
 }
 
-#accountField {
+.accountField {
   font-size: 0.6em;
+  padding: 0 0 12px 0;
+}
+
+.levelField {
+  font-weight: bold;
+  font-size: 1.1em;
 }
 
 .mainForm {
@@ -73,6 +79,10 @@ ul {
 
 .upgradebtn:hover {
   cursor: pointer;
+}
+
+.inlineImg {
+  top:2px;
 }
 
 #diamondIcon {

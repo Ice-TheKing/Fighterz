@@ -202,9 +202,20 @@ const upgradeFighter = (req, res) => {
     }
     const fighter = fght;
     
+    // check if the fighter is dead
+    // this is so you can't upgrade the health of a dead fighter by 1 to make them alive lmao
+    if(fighter.health == 0) {
+      return res.status(400).json({ error: "Can't upgrade a dead fighter" });
+    }
+    
     // check if the fighter has upgrade points available
     if(fighter.levelupPts < 1) {
       return res.status(400).json({ error: 'No upgrades available' });
+    }
+    
+    if(stat == 'health') {
+      // make sure if they upgrade health, we also upgrade max health
+      fighter.maxHealth += 1;
     }
     
     fighter[stat] += 1; // upgrade the stat they want
@@ -224,9 +235,66 @@ const upgradeFighter = (req, res) => {
   });
 };
 
+const reviveFighter = (request, response) => {
+  const req = request;
+  const res = response;
+  
+  // get the account
+  return Account.AccountModel.findByUsername(req.session.account.username, (er1, acct) => {
+    if(er1) {
+      return res.status(400).json({ error: 'A problem occurred' });
+    }
+    
+    const account = acct;
+    if(account.revivals < 1) {
+      return res.status(400).json({ error: 'No Revivals available. Purchase more from the store page' });
+    }
+    
+    // get the fighter
+    return Fighter.FighterModel.findByNameId(req.body.name, req.session.account._id, (er2, fght) => {
+      if(er2) {
+        return res.status(400).json({ error: 'A problem occurred' });
+      }
+      const fighter = fght;
+      
+      // check if its already fine
+      if(fighter.health != 0) {
+        return res.status(400).json({ error: 'Fighter is already alive!' });
+      }
+      
+      // revive it
+      fighter.health = fighter.maxHealth;
+      
+      // remove a revival from the account
+      account.revivals -= 1;
+      
+      const fighterPromise = fighter.save();
+      
+      fighterPromise.then(() => {
+        const accountPromise = account.save();
+        
+        accountPromise.then(() => {
+          return res.json({ message: 'Fighter has been revived' });
+        });
+        
+        accountPromise.catch((er3) => {
+          return res.status(400).json({ error: 'An error occurred' });
+        });
+      });
+      
+      fighterPromise.catch((er3) => {
+        return res.status(400).json({ error: 'An error occurred' });
+      });
+      
+      return fighterPromise;
+    });
+  });
+};
+
 module.exports.upgradeFighter = upgradeFighter;
 module.exports.makerPage = makerPage;
 module.exports.getFighters = getFighters;
 module.exports.getAllFighters = getAllFighters;
 module.exports.make = makeFighter;
 module.exports.deleteFighter = deleteFighter;
+module.exports.reviveFighter = reviveFighter;

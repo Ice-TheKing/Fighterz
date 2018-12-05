@@ -86,6 +86,7 @@ const signup = (request, response) => {
       maxFighters: 3,
       diamonds: 0,
       gold: 0,
+      revivals: 0,
     };
 
     const newAccount = new Account.AccountModel(accountData);
@@ -146,7 +147,6 @@ const changePass = (request, response) => {
        }
 
        if (!doc) {
-         console.dir(err);
          return res.status(400).json({ error: 'Account not found. Please try again' });
        }
       // update password
@@ -181,6 +181,10 @@ const increaseMaxFighters = (request, response) => {
       console.dir(err);
       return res.status(500).json({ error: 'A problem occurred' });
     }
+    
+    if(!doc) {
+      return res.status(500).json({ error: "Can't find account. Please log out then log back in" });
+    }
 
     const account = doc;
     const increase = Number(req.body.numFighters);
@@ -213,6 +217,10 @@ const addDiamonds = (request, response) => {
   const res = response;
 
   Account.AccountModel.findByUsername(req.session.account.username, (err, doc) => {
+    if(!doc) {
+      return res.status(500).json({ error: "Can't find account. Please log out then log back in" });
+    }
+    
     const account = doc;
     const amount = Number(req.body.diamonds);
 
@@ -255,6 +263,60 @@ const getDiamonds = (request, response) => {
   });
 };
 
+const addRevivals = (request, response) => {
+  const req = request;
+  const res = response;
+  
+  return Account.AccountModel.findByUsername(req.session.account.username, (err, doc) => {
+    if(!doc) {
+      return res.status(500).json({ error: "Can't find account. Please log out then log back in" });
+    }
+    if(err) {
+      console.log(err);
+    }
+    
+    const account = doc;
+    const amount = Number(req.body.revivals || 1);
+    
+    // validate funds
+    const cost = amount * 80; // cost of one item
+    const diamonds = Number(account.diamonds);
+
+    if (diamonds < cost) {
+      return res.status(400).json({ error: 'Not enough diamonds' });
+    }
+    
+    account.revivals += amount;
+    account.diamonds -= cost;
+    
+    const accountPromise = doc.save();
+    
+    accountPromise.then(() => {
+      return res.json({ message: 'Purchase Successful' });
+    })
+    
+    accountPromise.catch(error => {
+      console.dir(error);
+      return res.status(500).json({ error: 'A problem occurred' });
+    });
+    
+    return accountPromise;
+  });
+};
+
+const getRevivals = (request, response) => {
+  const req = request;
+  const res = response;
+  
+  Account.AccountModel.findByUsername(req.session.account.username, (err, doc) => {
+    if (err) {
+      return res.status(400).json({ error: 'A problem occurred' })
+    }
+
+    return res.json({ revivals: doc.revivals });
+  });
+};
+
 module.exports.loginPage = loginPage;
 module.exports.login = login;
 module.exports.logout = logout;
@@ -266,3 +328,5 @@ module.exports.getMaxFighters = getMaxFighters;
 module.exports.increaseMaxFighters = increaseMaxFighters;
 module.exports.getDiamonds = getDiamonds;
 module.exports.addDiamonds = addDiamonds;
+module.exports.addRevivals = addRevivals;
+module.exports.getRevivals = getRevivals;

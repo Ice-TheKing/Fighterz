@@ -287,6 +287,60 @@ var AccountForm = function AccountForm(props) {
   );
 };
 
+var StorePage = function StorePage(props) {
+  return React.createElement(
+    'div',
+    { className: 'container' },
+    React.createElement(
+      'form',
+      { id: 'storeForm', name: 'storeForm' },
+      React.createElement(
+        'div',
+        { className: 'row' },
+        React.createElement(
+          'div',
+          { className: 'col s4 m4' },
+          React.createElement(
+            'div',
+            { className: 'card' },
+            React.createElement(
+              'div',
+              { className: 'card-image' },
+              React.createElement('img', { src: '/assets/img/revivalBkd.png' })
+            ),
+            React.createElement(
+              'div',
+              { className: 'card-title card-content' },
+              React.createElement(
+                'p',
+                null,
+                'Revival - ',
+                props.revivals
+              )
+            ),
+            React.createElement(
+              'div',
+              { className: 'card-action' },
+              React.createElement(
+                'a',
+                { className: 'waves-effect waves-light btn', onClick: handleBuyRevival },
+                '80 ',
+                React.createElement('img', { className: 'inlineImg', src: '/assets/img/diamondTiny.png' })
+              )
+            )
+          )
+        )
+      ),
+      React.createElement('input', { type: 'hidden', id: '_csrf', name: '_csrf', value: props.csrf })
+    )
+  );
+};
+
+var handleBuyRevival = function handleBuyRevival(e) {
+  var csrf = $("#_csrf").val();
+  sendAjax('POST', '/addRevivals', 'revivals=1&_csrf=' + csrf, redirect);
+};
+
 var BuyDiamondsPage = function BuyDiamondsPage(props) {
   return React.createElement(
     'form',
@@ -437,6 +491,20 @@ var handleUpgrade = function handleUpgrade(e) {
   });
 };
 
+var handleRevive = function handleRevive(e) {
+  var csrfToken = $("#_csrf").val();
+
+  var currentFighter = {
+    name: e.target.name,
+    _csrf: csrfToken
+  };
+
+  sendAjax('POST', '/reviveFighter', currentFighter, function () {
+    sendToast('Fighter has been revived');
+    loadFightersFromServer();
+  });
+};
+
 /// Renders all fighters owned by player
 var YourFighterList = function YourFighterList(props) {
   if (props.fighters.length === 0) {
@@ -454,7 +522,8 @@ var YourFighterList = function YourFighterList(props) {
 
   var fighterNodes = props.fighters.map(function (fighter) {
     // check to see if the fighter has level up points available
-    if (fighter.levelupPts > 0) {
+    // don't let players upgrade dead fighters lol
+    if (fighter.levelupPts > 0 && fighter.health != 0) {
       // ids for upgrading stats
       var healthId = fighter.name + '-health';
       var damageId = fighter.name + '-damage';
@@ -463,6 +532,7 @@ var YourFighterList = function YourFighterList(props) {
       var critId = fighter.name + '-crit';
       // displayed as the fighter level, so the user knows how many points they have to spend
       var fighterLevel = fighter.level - fighter.levelupPts + ' + ' + fighter.levelupPts;
+
       return React.createElement(
         'div',
         { key: fighter._id, className: 'fighter' },
@@ -480,9 +550,10 @@ var YourFighterList = function YourFighterList(props) {
                 { className: 'card-title' },
                 fighter.name
               ),
+              React.createElement('p', null),
               React.createElement(
                 'p',
-                null,
+                { className: 'levelField' },
                 'Level ',
                 fighterLevel
               ),
@@ -577,6 +648,27 @@ var YourFighterList = function YourFighterList(props) {
         )
       );
     } else {
+      // fighter name changes depending on if they are dead or not
+      var fighterName = fighter.name;
+      var health = fighter.health;
+      var reviveBtn = React.createElement('p', null);
+      // if the fighter is dead, change the way its displayed
+      if (fighter.health == 0) {
+        // change the name of the fighter to tell the user the fighter is dead
+        fighterName = fighter.name + ' (dead)';
+        // make the health display 0/maxHealth
+        health = fighter.health + '/' + fighter.maxHealth;
+
+        // make a revive button
+        reviveBtn = React.createElement(
+          'a',
+          { name: fighter.name, className: 'waves-effect waves-light btn', onClick: handleRevive },
+          'Revive (',
+          props.revivals,
+          ')'
+        );
+      }
+
       return React.createElement(
         'div',
         { key: fighter._id, className: 'fighter' },
@@ -591,12 +683,13 @@ var YourFighterList = function YourFighterList(props) {
               { className: 'card-content white-text' },
               React.createElement(
                 'span',
-                { className: 'card-title' },
-                fighter.name
+                { className: 'card-title fighterName' },
+                fighterName
               ),
+              reviveBtn,
               React.createElement(
                 'p',
-                null,
+                { className: 'levelField' },
                 'Level ',
                 fighter.level
               ),
@@ -625,7 +718,7 @@ var YourFighterList = function YourFighterList(props) {
                 'p',
                 null,
                 'Health: ',
-                fighter.health
+                health
               ),
               React.createElement(
                 'p',
@@ -693,7 +786,8 @@ var AllFighterList = function AllFighterList(props) {
   var yourFighterNodes = props.yourFighters.map(function (fighter) {
     var id = fighter.name + '-' + fighter.account;
     var itemName = fighter.name + ' - ' + fighter.level;
-    return React.createElement(
+    // if one of your fighters is dead, don't have it as an option to fight
+    if (fighter.health != 0) return React.createElement(
       'li',
       null,
       React.createElement(
@@ -716,7 +810,8 @@ var AllFighterList = function AllFighterList(props) {
     var modalhref = 'modal' + i;
     var modalhrefId = '#' + modalhref;
 
-    return React.createElement(
+    // if a fighter is dead, don't display it
+    if (fighter.health != 0) return React.createElement(
       'div',
       { key: fighter._id, className: 'fighter' },
       React.createElement(
@@ -735,9 +830,15 @@ var AllFighterList = function AllFighterList(props) {
             ),
             React.createElement(
               'p',
-              { id: 'accountField' },
+              { className: 'accountField' },
               'Created By ',
               fighter.username
+            ),
+            React.createElement(
+              'p',
+              { className: 'levelField' },
+              'Level ',
+              fighter.level
             ),
             React.createElement(
               'p',
@@ -784,13 +885,13 @@ var AllFighterList = function AllFighterList(props) {
               ),
               React.createElement(
                 'p',
-                { id: 'accountField' },
+                { className: 'accountField' },
                 'Created By ',
                 fighter.username
               ),
               React.createElement(
                 'p',
-                null,
+                { className: 'levelField' },
                 'Level ',
                 fighter.level
               ),
@@ -881,8 +982,12 @@ var AllFighterList = function AllFighterList(props) {
 /// gets back all fighters owned by the current user from the server, then renders fighter list
 var loadFightersFromServer = function loadFightersFromServer() {
   var csrf = $("#_csrf").val();
+  // get fighters
   sendAjax('GET', '/getFighters', null, function (data) {
-    ReactDOM.render(React.createElement(YourFighterList, { fighters: data.fighters, csrf: csrf }), document.querySelector("#content"));
+    // get revives, so the user can know how many they have
+    sendAjax('GET', '/getRevivals', null, function (revivalData) {
+      ReactDOM.render(React.createElement(YourFighterList, { fighters: data.fighters, revivals: revivalData.revivals, csrf: csrf }), document.querySelector("#content"));
+    });
   });
 };
 
@@ -899,21 +1004,24 @@ var loadAllFightersFromServer = function loadAllFightersFromServer() {
   });
 };
 
-/// renders the create fighter page
-var setupMakerPage = function setupMakerPage(csrf) {
-  ReactDOM.render(React.createElement(FighterForm, { csrf: csrf }), document.querySelector("#content"));
-
-  // setup sliders
-  setupMaterializeElements();
-
-  updateUrl('/createFighter');
-};
-
 /// renders the change password page
 var setupChangePassPage = function setupChangePassPage(csrf) {
   ReactDOM.render(React.createElement(ChangePassForm, { csrf: csrf }), document.querySelector("#content"));
 
   updateUrl('/changePass');
+};
+
+var setupFightersPage = function setupFightersPage(csrf) {
+  // ReactDOM.render(
+  //   <AllFighterList fighters={[]} csrf={csrf} />, document.querySelector("#content")
+  // );
+  // Show a loading screen while the AJAX call goes through
+
+  ReactDOM.render(React.createElement(LoadingPage, { csrf: csrf }), document.querySelector("#content"));
+
+  loadAllFightersFromServer();
+
+  updateUrl('/fighters');
 };
 
 var setupYourFightersPage = function setupYourFightersPage(csrf) {
@@ -929,17 +1037,28 @@ var setupYourFightersPage = function setupYourFightersPage(csrf) {
   updateUrl('/yourFighters');
 };
 
-var setupFightersPage = function setupFightersPage(csrf) {
-  // ReactDOM.render(
-  //   <AllFighterList fighters={[]} csrf={csrf} />, document.querySelector("#content")
-  // );
-  // Show a loading screen while the AJAX call goes through
+/// renders the create fighter page
+var setupMakerPage = function setupMakerPage(csrf) {
+  ReactDOM.render(React.createElement(FighterForm, { csrf: csrf }), document.querySelector("#content"));
 
-  ReactDOM.render(React.createElement(LoadingPage, { csrf: csrf }), document.querySelector("#content"));
+  // setup sliders
+  setupMaterializeElements();
 
-  loadAllFightersFromServer();
+  updateUrl('/createFighter');
+};
 
-  updateUrl('/fighters');
+/// renders the store page
+var setupStorePage = function setupStorePage(csrf) {
+  // render the loading page before we ask the server for our items
+  ReactDOM.render(React.createElement(StorePage, { csrf: csrf }), document.querySelector("#content"));
+
+  // get diamonds
+  sendAjax('GET', '/getRevivals', null, function (data) {
+    console.dir(data.revivals);
+    ReactDOM.render(React.createElement(StorePage, { csrf: csrf, revivals: data.revivals }), document.querySelector("#content"));
+  });
+
+  updateUrl('/store');
 };
 
 var setupAccountPage = function setupAccountPage(csrf) {
@@ -971,6 +1090,7 @@ var setupNavButtons = function setupNavButtons(csrf) {
   var yourFightersButton = document.querySelector("#yourFightersButton");
   var fightersButton = document.querySelector("#fightersButton");
   var accountButton = document.querySelector("#accountButton");
+  var storeButton = document.querySelector("#storeButton");
 
   makerButton.addEventListener("click", function (e) {
     e.preventDefault();
@@ -993,6 +1113,12 @@ var setupNavButtons = function setupNavButtons(csrf) {
   fightersButton.addEventListener("click", function (e) {
     e.preventDefault();
     setupFightersPage(csrf);
+    return false;
+  });
+
+  storeButton.addEventListener("click", function (e) {
+    e.preventDefault();
+    setupStorePage(csrf);
     return false;
   });
 
@@ -1185,6 +1311,7 @@ var getSliders = function getSliders() {
   return sliders;
 };
 
+// clears the create a fighter form
 var resetForm = function resetForm() {};
 'use strict';
 

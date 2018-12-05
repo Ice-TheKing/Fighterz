@@ -11,13 +11,13 @@ gulp.task('sass', () => {
 });
 
 // babel
-gulp.task('js', () => {
+gulp.task('js', () => 
   gulp.src('./client/*.js')
     .pipe(babel({
       presets: ['env', 'react']
     }))
     .pipe(gulp.dest('./hosted'))
-});
+);
 
 // return so the program stops if there's an error
 gulp.task('lint', () => {

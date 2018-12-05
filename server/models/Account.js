@@ -34,6 +34,11 @@ const AccountSchema = new mongoose.Schema({
     min: 0,
     required: true,
   },
+  revivals: {
+    type: Number,
+    min: 0,
+    required: true,
+  },
   diamonds: {
     type: Number,
     min: 0,

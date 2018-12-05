@@ -210,6 +210,36 @@ const AccountForm = (props) => {
   );
 };
 
+const StorePage = (props) => {
+  return (
+    <div className="container">
+      <form id="storeForm" name="storeForm">
+        <div className="row">
+          <div className = "col s4 m4">
+            <div className="card">
+              <div className="card-image">
+                <img src="/assets/img/revivalBkd.png"></img>
+              </div>
+              <div className="card-title card-content">
+                <p>Revival - {props.revivals}</p>
+              </div>
+              <div className="card-action">
+                <a className="waves-effect waves-light btn" onClick={handleBuyRevival}>80 <img className="inlineImg" src="/assets/img/diamondTiny.png"></img></a>
+              </div>
+            </div>
+          </div>
+        </div>
+        <input type="hidden" id="_csrf" name="_csrf" value={props.csrf} />
+      </form>
+    </div>
+  );
+};
+
+const handleBuyRevival = (e) => {
+  let csrf = $("#_csrf").val();
+  sendAjax('POST', '/addRevivals', `revivals=1&_csrf=${csrf}`, redirect);
+};
+
 const BuyDiamondsPage = (props) => {
   return (
     <form id="buyDiamondsForm" name="buyDiamondsForm">
@@ -309,6 +339,20 @@ const handleUpgrade = (e) => {
   });
 };
 
+const handleRevive = (e) => {
+  let csrfToken = $("#_csrf").val();
+  
+  let currentFighter = {
+    name: e.target.name,
+    _csrf: csrfToken,
+  };
+  
+  sendAjax('POST', '/reviveFighter', currentFighter, () => {
+    sendToast('Fighter has been revived');
+    loadFightersFromServer();
+  });
+}
+
 /// Renders all fighters owned by player
 const YourFighterList = function(props) {
   if(props.fighters.length === 0) {
@@ -322,7 +366,8 @@ const YourFighterList = function(props) {
   
   const fighterNodes = props.fighters.map(function(fighter) {
     // check to see if the fighter has level up points available
-    if(fighter.levelupPts > 0) {
+    // don't let players upgrade dead fighters lol
+    if(fighter.levelupPts > 0 && fighter.health != 0) {
       // ids for upgrading stats
       const healthId = `${fighter.name}-health`;
       const damageId = `${fighter.name}-damage`;
@@ -331,56 +376,75 @@ const YourFighterList = function(props) {
       const critId = `${fighter.name}-crit`;
       // displayed as the fighter level, so the user knows how many points they have to spend
       const fighterLevel = `${fighter.level-fighter.levelupPts} + ${fighter.levelupPts}`;
-    return (
-      <div key={fighter._id} className="fighter">
-        <div className="col s12 m12">
-          <div className="card dark-purple lighten-1">
-            <div className="card-content white-text">
-              <span className="card-title">{fighter.name}</span>
-              <p>Level {fighterLevel}</p>
-              <p>xp: {fighter.xp.toFixed(1)}/{fighter.xpToNext}</p>
-              <p>Wins: {fighter.wins}{/*({(100*fighter.wins/fighter.fights).toFixed(1)}%)*/}</p>
-              <p>Fights: {fighter.fights}</p>
-              <br></br>
-              <p>Health: {fighter.health}<i id={healthId} className="tiny material-icons upgradebtn" onClick={handleUpgrade}>add</i></p>
-              <p>Damage: {fighter.damage}<i id={damageId} className="tiny material-icons upgradebtn" onClick={handleUpgrade}>add</i></p>
-              <p>Speed: {fighter.speed}<i id={speedId} className="tiny material-icons upgradebtn" onClick={handleUpgrade}>add</i></p>
-              <p>Armor: {fighter.armor}<i id={armorId} className="tiny material-icons upgradebtn" onClick={handleUpgrade}>add</i></p>
-              <p>Crit Chance: {fighter.crit * 2}% <i id={critId} className="tiny material-icons upgradebtn" onClick={handleUpgrade}>add</i></p>
+      
+      return (
+        <div key={fighter._id} className="fighter">
+          <div className="col s12 m12">
+            <div className="card dark-purple lighten-1">
+              <div className="card-content white-text">
+                <span className="card-title">{fighter.name}</span><p></p>
+                <p className="levelField">Level {fighterLevel}</p>
+                <p>xp: {fighter.xp.toFixed(1)}/{fighter.xpToNext}</p>
+                <p>Wins: {fighter.wins}{/*({(100*fighter.wins/fighter.fights).toFixed(1)}%)*/}</p>
+                <p>Fights: {fighter.fights}</p>
+                <br></br>
+                <p>Health: {fighter.health}<i id={healthId} className="tiny material-icons upgradebtn" onClick={handleUpgrade}>add</i></p>
+                <p>Damage: {fighter.damage}<i id={damageId} className="tiny material-icons upgradebtn" onClick={handleUpgrade}>add</i></p>
+                <p>Speed: {fighter.speed}<i id={speedId} className="tiny material-icons upgradebtn" onClick={handleUpgrade}>add</i></p>
+                <p>Armor: {fighter.armor}<i id={armorId} className="tiny material-icons upgradebtn" onClick={handleUpgrade}>add</i></p>
+                <p>Crit Chance: {fighter.crit * 2}% <i id={critId} className="tiny material-icons upgradebtn" onClick={handleUpgrade}>add</i></p>
+              </div>
+              <div className="card-action">
+                <a name={fighter.name} onClick={handleDeleteClick}>Delete Fighter</a>
+              </div>
             </div>
-            <div className="card-action">
-              <a name={fighter.name} onClick={handleDeleteClick}>Delete Fighter</a>
-            </div>
-          </div>
-        </div>      
-      </div>
-    );
+          </div>      
+        </div>
+      );
     }
     else {
-    return (
-      <div key={fighter._id} className="fighter">
-        <div className="col s12 m12">
-          <div className="card dark-purple lighten-1">
-            <div className="card-content white-text">
-              <span className="card-title">{fighter.name}</span>
-              <p>Level {fighter.level}</p>
-              <p>xp: {fighter.xp.toFixed(1)}/{fighter.xpToNext}</p>
-              <p>Wins: {fighter.wins}{/*({(100*fighter.wins/fighter.fights).toFixed(1)}%)*/}</p>
-              <p>Fights: {fighter.fights}</p>
-              <br></br>
-              <p>Health: {fighter.health}</p>
-              <p>Damage: {fighter.damage}</p>
-              <p>Speed: {fighter.speed}</p>
-              <p>Armor: {fighter.armor}</p>
-              <p>Crit Chance: {fighter.crit * 2}%</p>
+      // fighter name changes depending on if they are dead or not
+      let fighterName = fighter.name;
+      let health = fighter.health;
+      let reviveBtn = <p></p>;
+      // if the fighter is dead, change the way its displayed
+      if(fighter.health == 0) {
+        // change the name of the fighter to tell the user the fighter is dead
+        fighterName = `${fighter.name} (dead)`;
+        // make the health display 0/maxHealth
+        health = `${fighter.health}/${fighter.maxHealth}`;
+        
+        // make a revive button
+        reviveBtn = (
+          <a name={fighter.name} className="waves-effect waves-light btn" onClick={handleRevive}>Revive ({props.revivals})</a>
+        );
+      }
+      
+      return (
+        <div key={fighter._id} className="fighter">
+          <div className="col s12 m12">
+            <div className="card dark-purple lighten-1">
+              <div className="card-content white-text">
+                <span className="card-title fighterName">{fighterName}</span>
+                {reviveBtn}
+                <p className="levelField">Level {fighter.level}</p>
+                <p>xp: {fighter.xp.toFixed(1)}/{fighter.xpToNext}</p>
+                <p>Wins: {fighter.wins}{/*({(100*fighter.wins/fighter.fights).toFixed(1)}%)*/}</p>
+                <p>Fights: {fighter.fights}</p>
+                <br></br>
+                <p>Health: {health}</p>
+                <p>Damage: {fighter.damage}</p>
+                <p>Speed: {fighter.speed}</p>
+                <p>Armor: {fighter.armor}</p>
+                <p>Crit Chance: {fighter.crit * 2}%</p>
+              </div>
+              <div className="card-action">
+                <a name={fighter.name} onClick={handleDeleteClick}>Delete Fighter</a>
+              </div>
             </div>
-            <div className="card-action">
-              <a name={fighter.name} onClick={handleDeleteClick}>Delete Fighter</a>
-            </div>
-          </div>
-        </div>      
-      </div>
-    );
+          </div>      
+        </div>
+      );
     }
   });
   
@@ -405,7 +469,8 @@ const AllFighterList = function(props) {
   const yourFighterNodes = props.yourFighters.map(function(fighter) {
     const id = `${fighter.name}-${fighter.account}`;
     const itemName = `${fighter.name} - ${fighter.level}`;
-    return (
+    // if one of your fighters is dead, don't have it as an option to fight
+    if(fighter.health != 0) return (
       <li><a href="#" id={id} onClick={startFight}>{itemName}</a></li>
     );
   });
@@ -422,13 +487,15 @@ const AllFighterList = function(props) {
     const modalhref = `modal${i}`;
     const modalhrefId = `#${modalhref}`;
     
-    return (
+    // if a fighter is dead, don't display it
+    if(fighter.health != 0) return (
       <div key={fighter._id} className="fighter">
         <div className="col s3 m3">
           <div className="card clickable dark-purple lighten-1">
             <div className="card-content white-text modal-trigger" href={modalhrefId}>
               <span className="card-title">{fighter.name}</span>
-              <p id="accountField">Created By {fighter.username}</p>
+              <p className="accountField">Created By {fighter.username}</p>
+              <p className="levelField">Level {fighter.level}</p>
               <p>Health: {fighter.health}</p>
               <p>Damage: {fighter.damage}</p>
               <p>Speed: {fighter.speed}</p>
@@ -443,8 +510,8 @@ const AllFighterList = function(props) {
             <div id={modalhref} className="modal">
               <div className="modal-content card-content dark-purple lighten-1 white-text">
                   <span className="card-title">{fighter.name}</span>
-                  <p id="accountField">Created By {fighter.username}</p>
-                  <p>Level {fighter.level}</p>
+                  <p className="accountField">Created By {fighter.username}</p>
+                  <p className="levelField">Level {fighter.level}</p>
                   <p>xp: {fighter.xp.toFixed(1)}/{fighter.xpToNext}</p>
                   <p>Wins: {fighter.wins}{/*({(100*fighter.wins/fighter.fights).toFixed(1)}%)*/}</p>
                   <p>Fights: {fighter.fights}</p><br></br>
@@ -478,11 +545,15 @@ const AllFighterList = function(props) {
 /// gets back all fighters owned by the current user from the server, then renders fighter list
 const loadFightersFromServer = () => {
   let csrf = $("#_csrf").val();
+  // get fighters
   sendAjax('GET', '/getFighters', null, (data) => {
-    ReactDOM.render(
-      <YourFighterList fighters={data.fighters} csrf={csrf} />,
-      document.querySelector("#content")
-    );
+    // get revives, so the user can know how many they have
+    sendAjax('GET', '/getRevivals', null, (revivalData) => {
+      ReactDOM.render(
+        <YourFighterList fighters={data.fighters} revivals={revivalData.revivals} csrf={csrf} />,
+        document.querySelector("#content")
+      );
+    });
   });
 };
 
@@ -503,18 +574,6 @@ const loadAllFightersFromServer = () => {
   });
 };
 
-/// renders the create fighter page
-const setupMakerPage = function(csrf) {
-  ReactDOM.render(
-    <FighterForm csrf={csrf} />, document.querySelector("#content")
-  );
-  
-  // setup sliders
-  setupMaterializeElements();
-  
-  updateUrl('/createFighter');
-};
-
 /// renders the change password page
 const setupChangePassPage = function(csrf) {
   ReactDOM.render(
@@ -522,6 +581,21 @@ const setupChangePassPage = function(csrf) {
   );
   
   updateUrl('/changePass');
+};
+
+const setupFightersPage = function(csrf) {
+  // ReactDOM.render(
+  //   <AllFighterList fighters={[]} csrf={csrf} />, document.querySelector("#content")
+  // );
+  // Show a loading screen while the AJAX call goes through
+  
+  ReactDOM.render(
+    <LoadingPage csrf={csrf} />, document.querySelector("#content")
+  );
+  
+  loadAllFightersFromServer();
+  
+  updateUrl('/fighters');
 };
 
 const setupYourFightersPage = function(csrf) {
@@ -539,19 +613,34 @@ const setupYourFightersPage = function(csrf) {
   updateUrl('/yourFighters');
 };
 
-const setupFightersPage = function(csrf) {
-  // ReactDOM.render(
-  //   <AllFighterList fighters={[]} csrf={csrf} />, document.querySelector("#content")
-  // );
-  // Show a loading screen while the AJAX call goes through
-  
+/// renders the create fighter page
+const setupMakerPage = function(csrf) {
   ReactDOM.render(
-    <LoadingPage csrf={csrf} />, document.querySelector("#content")
+    <FighterForm csrf={csrf} />, document.querySelector("#content")
   );
   
-  loadAllFightersFromServer();
+  // setup sliders
+  setupMaterializeElements();
   
-  updateUrl('/fighters');
+  updateUrl('/createFighter');
+};
+
+/// renders the store page
+const setupStorePage = function(csrf) {
+  // render the loading page before we ask the server for our items
+  ReactDOM.render(
+    <StorePage csrf={csrf} />, document.querySelector("#content")
+  );
+  
+  // get diamonds
+  sendAjax('GET', '/getRevivals', null, (data) => {
+    console.dir(data.revivals);
+    ReactDOM.render(
+      <StorePage csrf={csrf} revivals={data.revivals} />, document.querySelector("#content")
+    );
+  });
+  
+  updateUrl('/store');
 };
 
 const setupAccountPage = function(csrf) {
@@ -589,6 +678,7 @@ const setupNavButtons = function(csrf) {
   const yourFightersButton = document.querySelector("#yourFightersButton");
   const fightersButton = document.querySelector("#fightersButton");
   const accountButton = document.querySelector("#accountButton");
+  const storeButton = document.querySelector("#storeButton");
   
   makerButton.addEventListener("click", (e) => {
     e.preventDefault();
@@ -611,6 +701,12 @@ const setupNavButtons = function(csrf) {
   fightersButton.addEventListener("click", (e) => {
     e.preventDefault();
     setupFightersPage(csrf);
+    return false;
+  });
+  
+  storeButton.addEventListener("click", (e) => {
+    e.preventDefault();
+    setupStorePage(csrf);
     return false;
   });
   
@@ -779,6 +875,7 @@ const getSliders = () => {
   return sliders;
 };
 
+// clears the create a fighter form
 const resetForm = () => {
   
 };

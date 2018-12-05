@@ -21,14 +21,6 @@ const handleGameEnd = (wnr, lsr, log, callback) => {
   const loser = lsr;
   const battleLog = log;
 
-  // check to see if the match was a death match
-  // let deathMatch = false;
-  if (winner.level > 4 && loser.level > 4) {
-    // deathMatch = true;
-  }
-
-  // TODO: check to see if loser dies
-
   // give each fighter some xp
   // You get 1/yourlevel * opponents level xp * 5
   // so in an equal match, winner gets 5 xp, loser gets 1
@@ -62,7 +54,47 @@ const handleGameEnd = (wnr, lsr, log, callback) => {
   winner.wins += 1;
   winner.fights += 1;
   loser.fights += 1;
-
+  
+  // check to see if the match was a death match
+  let deathMatch = false;
+  if (winner.level > 4 && loser.level > 4) {
+    deathMatch = true;
+  }
+  
+  // chance to die depends on % health missing
+  // basically how this one is gonna work, is we get the percentage health missing of
+  // the loser's total health as a ratio. So if they have 20 max health, and when the battle
+  // was over, they had -15 health, the death ratio is 0.5 since max health is multiplied by 1.5,
+  // so that 0.5 is x. then we feed it into the equation 100x^2 to get the percent chance 
+  // (out of 100) that the dude died. So in our example we used, using the ratio 0.5, there would
+  // be a 25% chance of them dying. To get the curve, google 'graph (100x^2)'
+  // don't forget this considers maxHealth to be twice as high. So in order to have a 100% chance
+  // to die, the -damage will have to be 1.5x as high as the loser's max health
+  let deathRatio = Math.abs(loser.tempHealth / Math.floor((loser.maxHealth*1.5)));
+  
+  let chanceToDie = 100*(deathRatio*deathRatio); // 100 * deathRatio^2
+  
+  console.log(`temp health: ${loser.tempHealth} | max health: ${loser.maxHealth}`);
+  console.log(`deathRatio: ${deathRatio}`);
+  console.log(`chanceToDie: ${chanceToDie}%`);
+  
+  if(deathMatch) {
+    // check to see if the loser died
+    if(deathRatio > 1 || roll(100) < chanceToDie) {
+      // they died
+      loser.health = 0;
+      battleLog.push(`${winner.name} killed ${loser.name}`);
+      // give the winner another kill
+      winner.kills += 1;
+    } else {
+      battleLog.push(`${winner.name} defeated ${loser.name}`);
+    }
+  } else {
+    battleLog.push(`${winner.name} defeated ${loser.name}`);
+  }
+  
+  console.dir(battleLog);
+  
   // update database
   const winnerPromise = winner.save();
   winnerPromise.then(() => {
@@ -164,7 +196,8 @@ const isDead = (fighter) => {
 const runFight = (request, response) => {
   const req = request;
   const res = response;
-
+  
+  // check if the fighter has the same account and name (fighters can't battle themselves)
   if (req.body.fighterName1 === req.body.fighterName2
     && req.body.fighterId1 === req.body.fighterId2) {
     return res.status(400).json({ error: "Fighters can't fight themselves!" });
@@ -186,8 +219,11 @@ const runFight = (request, response) => {
       // GOT BOTH FIGHTERS FROM DATABASE
       const fighter1 = f1;
       const fighter2 = f2;
-
-      // check if the fighter has the same account and name (fighters can't battle themselves)
+      
+      // check to see if either of the fighters are dead
+      if(fighter1.health == 0 || fighter2.health == 0) {
+        return res.status(400).json({ error: "Can't fight with or against a dead fighter" });
+      }
 
       // give each fighter a tempHealth property to subtract from for running each round.
       // This is so if something messes up, it won't subtract
@@ -255,7 +291,7 @@ const runFight = (request, response) => {
         if (isDead(defender)) {
           winner = attacker;
           loser = defender;
-          battleLog.push(`${winner.name} defeated ${loser.name}`);
+          //battleLog.push(`${winner.name} defeated ${loser.name}`);
           break;
         }
 
@@ -266,7 +302,7 @@ const runFight = (request, response) => {
         if (isDead(attacker)) {
           winner = defender;
           loser = attacker;
-          battleLog.push(`${winner.name} defeated ${loser.name}`);
+          //battleLog.push(`${winner.name} defeated ${loser.name}`);
           break;
         }
 
@@ -278,17 +314,17 @@ const runFight = (request, response) => {
           if (isDead(defender)) {
             winner = attacker;
             loser = defender;
-            battleLog.push(`${winner.name} defeated ${loser.name}`);
+            //battleLog.push(`${winner.name} defeated ${loser.name}`);
             break;
           }
         }
       }
-
-      console.dir(battleLog);
+      
       if (winner && loser) {
         // update the winner and loser
-        return handleGameEnd(winner, loser, battleLog,
-                             () => res.json({ message: `${winner.name} defeated ${loser.name}` }));
+        // return handleGameEnd(winner, loser, battleLog, () => res.json({ message: `${winner.name} defeated ${loser.name}`}));
+        // return the last log as a message, which should say whether a fighter defeated or killed the other
+        return handleGameEnd(winner, loser, battleLog, () => res.json({ message: battleLog[battleLog.length-1]}));
       }
 
       return res.json({ error: 'An error occurred' });
