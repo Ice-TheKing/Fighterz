@@ -26,7 +26,8 @@ const router = (app) => {
   app.post('/deleteFighter', mid.requiresLogin, controllers.Fighter.deleteFighter);
   app.post('/reviveFighter', mid.requiresLogin, controllers.Fighter.reviveFighter);
   app.post('/fight', mid.requiresLogin, mid.requiresSecure, controllers.Battle.runFight);
-  app.post('/upgradeFighter', mid.requiresLogin, mid.requiresSecure, controllers.Fighter.upgradeFighter);
+  app.post('/upgradeFighter', mid.requiresLogin, mid.requiresSecure,
+           controllers.Fighter.upgradeFighter);
   app.get('/', mid.requiresSecure, mid.requiresLogout, controllers.Account.loginPage);
   app.get('/*', mid.requiresSecure, mid.requiresLogout, controllers.Account.loginPage);
 };

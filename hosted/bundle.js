@@ -577,6 +577,18 @@ var YourFighterList = function YourFighterList(props) {
                 'Fights: ',
                 fighter.fights
               ),
+              React.createElement(
+                'p',
+                null,
+                'Kills: ',
+                fighter.kills
+              ),
+              React.createElement(
+                'p',
+                null,
+                'Revivals: ',
+                fighter.revivals
+              ),
               React.createElement('br', null),
               React.createElement(
                 'p',
@@ -712,6 +724,18 @@ var YourFighterList = function YourFighterList(props) {
                 null,
                 'Fights: ',
                 fighter.fights
+              ),
+              React.createElement(
+                'p',
+                null,
+                'Kills: ',
+                fighter.kills
+              ),
+              React.createElement(
+                'p',
+                null,
+                'Revivals: ',
+                fighter.revivals
               ),
               React.createElement('br', null),
               React.createElement(
@@ -914,6 +938,18 @@ var AllFighterList = function AllFighterList(props) {
                 null,
                 'Fights: ',
                 fighter.fights
+              ),
+              React.createElement(
+                'p',
+                null,
+                'Kills: ',
+                fighter.kills
+              ),
+              React.createElement(
+                'p',
+                null,
+                'Revivals: ',
+                fighter.revivals
               ),
               React.createElement('br', null),
               React.createElement(

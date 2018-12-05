@@ -261,6 +261,9 @@ const reviveFighter = (request, response) => {
       // revive it
       fighter.health = fighter.maxHealth;
 
+      // increase its number of revivals
+      fighter.revivals += 1;
+
       // remove a revival from the account
       account.revivals -= 1;
 

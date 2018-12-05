@@ -387,6 +387,8 @@ const YourFighterList = function(props) {
                 <p>xp: {fighter.xp.toFixed(1)}/{fighter.xpToNext}</p>
                 <p>Wins: {fighter.wins}{/*({(100*fighter.wins/fighter.fights).toFixed(1)}%)*/}</p>
                 <p>Fights: {fighter.fights}</p>
+                <p>Kills: {fighter.kills}</p>
+                <p>Revivals: {fighter.revivals}</p>
                 <br></br>
                 <p>Health: {fighter.health}<i id={healthId} className="tiny material-icons upgradebtn" onClick={handleUpgrade}>add</i></p>
                 <p>Damage: {fighter.damage}<i id={damageId} className="tiny material-icons upgradebtn" onClick={handleUpgrade}>add</i></p>
@@ -431,6 +433,8 @@ const YourFighterList = function(props) {
                 <p>xp: {fighter.xp.toFixed(1)}/{fighter.xpToNext}</p>
                 <p>Wins: {fighter.wins}{/*({(100*fighter.wins/fighter.fights).toFixed(1)}%)*/}</p>
                 <p>Fights: {fighter.fights}</p>
+                <p>Kills: {fighter.kills}</p>
+                <p>Revivals: {fighter.revivals}</p>
                 <br></br>
                 <p>Health: {health}</p>
                 <p>Damage: {fighter.damage}</p>
@@ -514,7 +518,10 @@ const AllFighterList = function(props) {
                   <p className="levelField">Level {fighter.level}</p>
                   <p>xp: {fighter.xp.toFixed(1)}/{fighter.xpToNext}</p>
                   <p>Wins: {fighter.wins}{/*({(100*fighter.wins/fighter.fights).toFixed(1)}%)*/}</p>
-                  <p>Fights: {fighter.fights}</p><br></br>
+                  <p>Fights: {fighter.fights}</p>
+                  <p>Kills: {fighter.kills}</p>
+                  <p>Revivals: {fighter.revivals}</p>
+                  <br></br>
                   <p>Health: {fighter.health}</p>
                   <p>Damage: {fighter.damage}</p>
                   <p>Speed: {fighter.speed}</p>
