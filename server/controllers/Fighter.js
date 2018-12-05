@@ -185,52 +185,45 @@ const makeFighter = (req, res) => {
 };
 
 const upgradeFighter = (req, res) => {
-  const request = req;
-  const response = res;
-  
   // get each piece
   const name = req.body.name;
   const acct = req.session.account._id;
   const stat = req.body.stat;
   // console.dir(`name:${name} acct:${acct} stat:${stat}`);
-  
+
   // get the fighter
   return Fighter.FighterModel.findByNameId(name, acct, (err, fght) => {
-    if(err) {
+    if (err) {
       console.log(err);
       return res.status(400).json({ error: 'An error occurred' });
     }
     const fighter = fght;
-    
+
     // check if the fighter is dead
     // this is so you can't upgrade the health of a dead fighter by 1 to make them alive lmao
-    if(fighter.health == 0) {
+    if (fighter.health === 0) {
       return res.status(400).json({ error: "Can't upgrade a dead fighter" });
     }
-    
+
     // check if the fighter has upgrade points available
-    if(fighter.levelupPts < 1) {
+    if (fighter.levelupPts < 1) {
       return res.status(400).json({ error: 'No upgrades available' });
     }
-    
-    if(stat == 'health') {
+
+    if (stat === 'health') {
       // make sure if they upgrade health, we also upgrade max health
       fighter.maxHealth += 1;
     }
-    
+
     fighter[stat] += 1; // upgrade the stat they want
     fighter.levelupPts -= 1; // they used a level up point
-    
+
     const fighterPromise = fighter.save();
-    
-    fighterPromise.then(() => {
-      return res.json({  });
-    });
-    
-    fighterPromise.catch((er) => {
-      return res.status(400).json({ error: 'An error occurred' });
-    });
-    
+
+    fighterPromise.then(() => res.json({ }));
+
+    fighterPromise.catch(() => res.status(400).json({ error: 'An error occurred' }));
+
     return fighterPromise;
   });
 };
@@ -238,54 +231,51 @@ const upgradeFighter = (req, res) => {
 const reviveFighter = (request, response) => {
   const req = request;
   const res = response;
-  
+
   // get the account
   return Account.AccountModel.findByUsername(req.session.account.username, (er1, acct) => {
-    if(er1) {
+    if (er1) {
       return res.status(400).json({ error: 'A problem occurred' });
     }
-    
+
     const account = acct;
-    if(account.revivals < 1) {
-      return res.status(400).json({ error: 'No Revivals available. Purchase more from the store page' });
+    if (account.revivals < 1) {
+      return res.status(400).json({
+        error: 'No Revivals available. Purchase more from the store page',
+      });
     }
-    
+
     // get the fighter
-    return Fighter.FighterModel.findByNameId(req.body.name, req.session.account._id, (er2, fght) => {
-      if(er2) {
+    return Fighter.FighterModel.
+    findByNameId(req.body.name, req.session.account._id, (er2, fght) => {
+      if (er2) {
         return res.status(400).json({ error: 'A problem occurred' });
       }
       const fighter = fght;
-      
+
       // check if its already fine
-      if(fighter.health != 0) {
+      if (fighter.health !== 0) {
         return res.status(400).json({ error: 'Fighter is already alive!' });
       }
-      
+
       // revive it
       fighter.health = fighter.maxHealth;
-      
+
       // remove a revival from the account
       account.revivals -= 1;
-      
+
       const fighterPromise = fighter.save();
-      
+
       fighterPromise.then(() => {
         const accountPromise = account.save();
-        
-        accountPromise.then(() => {
-          return res.json({ message: 'Fighter has been revived' });
-        });
-        
-        accountPromise.catch((er3) => {
-          return res.status(400).json({ error: 'An error occurred' });
-        });
+
+        accountPromise.then(() => res.json({ message: 'Fighter has been revived' }));
+
+        accountPromise.catch(() => res.status(400).json({ error: 'An error occurred' }));
       });
-      
-      fighterPromise.catch((er3) => {
-        return res.status(400).json({ error: 'An error occurred' });
-      });
-      
+
+      fighterPromise.catch(() => res.status(400).json({ error: 'An error occurred' }));
+
       return fighterPromise;
     });
   });

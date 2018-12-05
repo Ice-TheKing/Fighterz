@@ -181,8 +181,8 @@ const increaseMaxFighters = (request, response) => {
       console.dir(err);
       return res.status(500).json({ error: 'A problem occurred' });
     }
-    
-    if(!doc) {
+
+    if (!doc) {
       return res.status(500).json({ error: "Can't find account. Please log out then log back in" });
     }
 
@@ -216,11 +216,11 @@ const addDiamonds = (request, response) => {
   const req = request;
   const res = response;
 
-  Account.AccountModel.findByUsername(req.session.account.username, (err, doc) => {
-    if(!doc) {
+  return Account.AccountModel.findByUsername(req.session.account.username, (err, doc) => {
+    if (!doc) {
       return res.status(500).json({ error: "Can't find account. Please log out then log back in" });
     }
-    
+
     const account = doc;
     const amount = Number(req.body.diamonds);
 
@@ -234,6 +234,8 @@ const addDiamonds = (request, response) => {
       console.dir(error);
       return res.status(500).json({ error: 'A problem occurred' });
     });
+
+    return accountPromise;
   });
 };
 
@@ -266,18 +268,18 @@ const getDiamonds = (request, response) => {
 const addRevivals = (request, response) => {
   const req = request;
   const res = response;
-  
+
   return Account.AccountModel.findByUsername(req.session.account.username, (err, doc) => {
-    if(!doc) {
+    if (!doc) {
       return res.status(500).json({ error: "Can't find account. Please log out then log back in" });
     }
-    if(err) {
+    if (err) {
       console.log(err);
     }
-    
+
     const account = doc;
     const amount = Number(req.body.revivals || 1);
-    
+
     // validate funds
     const cost = amount * 80; // cost of one item
     const diamonds = Number(account.diamonds);
@@ -285,21 +287,19 @@ const addRevivals = (request, response) => {
     if (diamonds < cost) {
       return res.status(400).json({ error: 'Not enough diamonds' });
     }
-    
+
     account.revivals += amount;
     account.diamonds -= cost;
-    
+
     const accountPromise = doc.save();
-    
-    accountPromise.then(() => {
-      return res.json({ message: 'Purchase Successful' });
-    })
-    
+
+    accountPromise.then(() => res.json({ message: 'Purchase Successful' }));
+
     accountPromise.catch(error => {
       console.dir(error);
       return res.status(500).json({ error: 'A problem occurred' });
     });
-    
+
     return accountPromise;
   });
 };
@@ -307,10 +307,10 @@ const addRevivals = (request, response) => {
 const getRevivals = (request, response) => {
   const req = request;
   const res = response;
-  
+
   Account.AccountModel.findByUsername(req.session.account.username, (err, doc) => {
     if (err) {
-      return res.status(400).json({ error: 'A problem occurred' })
+      return res.status(400).json({ error: 'A problem occurred' });
     }
 
     return res.json({ revivals: doc.revivals });
