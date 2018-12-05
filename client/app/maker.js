@@ -516,7 +516,7 @@ const AllFighterList = function(props) {
                   <span className="card-title">{fighter.name}</span>
                   <p className="accountField">Created By {fighter.username}</p>
                   <p className="levelField">Level {fighter.level}</p>
-                  <p>xp: {fighter.xp.toFixed(1)}/{fighter.xpToNext}</p>
+                  {/*<p>xp: {fighter.xp.toFixed(1)}/{fighter.xpToNext}</p>*/}
                   <p>Wins: {fighter.wins}{/*({(100*fighter.wins/fighter.fights).toFixed(1)}%)*/}</p>
                   <p>Fights: {fighter.fights}</p>
                   <p>Kills: {fighter.kills}</p>

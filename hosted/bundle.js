@@ -922,14 +922,6 @@ var AllFighterList = function AllFighterList(props) {
               React.createElement(
                 'p',
                 null,
-                'xp: ',
-                fighter.xp.toFixed(1),
-                '/',
-                fighter.xpToNext
-              ),
-              React.createElement(
-                'p',
-                null,
                 'Wins: ',
                 fighter.wins
               ),
