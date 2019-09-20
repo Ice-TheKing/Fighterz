@@ -22,7 +22,7 @@ const handleGameEnd = (wnr, lsr, log, callback) => {
   const battleLog = log;
 
   // give each fighter some xp
-  // You get 1/yourlevel * opponents level xp * 5
+  // You get 1/yourlevel * opponents level * 5
   // so in an equal match, winner gets 5 xp, loser gets 1
   // and if you fight a level 2 as a level 5 and win, you get 2 xp
   // and they get 2.5xp
@@ -56,10 +56,7 @@ const handleGameEnd = (wnr, lsr, log, callback) => {
   loser.fights += 1;
 
   // check to see if the match was a death match
-  let deathMatch = false;
-  if (winner.level > 4 && loser.level > 4) {
-    deathMatch = true;
-  }
+  let deathMatch = (winner.level > 4 && loser.level > 4) ? true : false;
 
   // chance to die depends on % health missing
   // basically how this one is gonna work, is we get the percentage health missing of
