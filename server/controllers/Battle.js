@@ -56,7 +56,7 @@ const handleGameEnd = (wnr, lsr, log, callback) => {
   loser.fights += 1;
 
   // check to see if the match was a death match
-  let deathMatch = (winner.level > 4 && loser.level > 4) ? true : false;
+  const deathMatch = !!((winner.level > 4 && loser.level > 4));
 
   // chance to die depends on % health missing
   // basically how this one is gonna work, is we get the percentage health missing of
