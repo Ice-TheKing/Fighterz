@@ -505,14 +505,13 @@ const AllFighterList = function(props) {
               <p>Speed: {fighter.speed}</p>
               <p>Armor: {fighter.armor}</p>
               <p>Crit Chance: {fighter.crit * 2}%</p>
-              {/*<br></br>
-              <a className="dropdown-trigger btn-floating btn-large soft-violet waves-effect waves-light" data-target={dropdownId}>Fight</a>
-                <ul id={dropdownId} title={title} className='dropdown-content'>
-                  {yourFighterNodes}
-                </ul>*/}
             </div>
             <div id={modalhref} className="modal">
               <div className="modal-content card-content dark-purple lighten-1 white-text">
+                  <a className="dropdown-trigger soft-violet right waves-effect waves-light" data-target='325'>Logs</a><br></br>
+                  <ul id='325' className='dropdown-content'>
+                    {yourFighterNodes}
+                  </ul>
                   <span className="card-title">{fighter.name}</span>
                   <p className="accountField">Created By {fighter.username}</p>
                   <p className="levelField">Level {fighter.level}</p>
@@ -528,7 +527,7 @@ const AllFighterList = function(props) {
                   <p>Armor: {fighter.armor}</p>
                   <p>Crit Chance: {fighter.crit * 2}%</p>
                   <br></br>
-                  <a className="dropdown-trigger btn-floating btn-large soft-violet waves-effect waves-light" data-target={dropdownId}>Fight</a>
+                  <a className="dropdown-trigger btn-floating btn-large soft-violet waves-effect waves-light" title={title} data-target={dropdownId}>Fight</a>
                   <ul id={dropdownId} title={title} className='dropdown-content'>
                     {yourFighterNodes}
                   </ul>

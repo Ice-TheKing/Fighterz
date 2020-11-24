@@ -903,6 +903,17 @@ var AllFighterList = function AllFighterList(props) {
               'div',
               { className: 'modal-content card-content dark-purple lighten-1 white-text' },
               React.createElement(
+                'a',
+                { className: 'dropdown-trigger soft-violet right waves-effect waves-light', 'data-target': '325' },
+                'Logs'
+              ),
+              React.createElement('br', null),
+              React.createElement(
+                'ul',
+                { id: '325', className: 'dropdown-content' },
+                yourFighterNodes
+              ),
+              React.createElement(
                 'span',
                 { className: 'card-title' },
                 fighter.name
@@ -978,7 +989,7 @@ var AllFighterList = function AllFighterList(props) {
               React.createElement('br', null),
               React.createElement(
                 'a',
-                { className: 'dropdown-trigger btn-floating btn-large soft-violet waves-effect waves-light', 'data-target': dropdownId },
+                { className: 'dropdown-trigger btn-floating btn-large soft-violet waves-effect waves-light', title: title, 'data-target': dropdownId },
                 'Fight'
               ),
               React.createElement(
