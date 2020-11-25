@@ -4,7 +4,7 @@ const Fighter = models.Fighter;
 // const Account = models.Account;
 
 // battle variables
-const critMultiplier = 1.5;
+const critMultiplier = 2;
 const xpRamp = 1.2;
 
 // rolls a random value between 0 and sides
@@ -20,7 +20,6 @@ const handleGameEnd = (wnr, lsr, log, callback) => {
   const winner = wnr;
   const loser = lsr;
   const battleLog = log;
-  const xpMult = 3;
 
   // give each fighter some xp
   // You get 1/yourlevel * opponents level * 5
@@ -28,8 +27,8 @@ const handleGameEnd = (wnr, lsr, log, callback) => {
   // and if you fight a level 2 as a level 5 and win, you get 2 xp
   // and they get 2.5xp
   // benefit for fighting a higher level is capped at a 5 level difference
-  const winnerxp = (Math.min((1 / winner.level * loser.level), 5) * 5 * xpMult);
-  const loserxp = ((1 / loser.level * Math.min(winner.level, 5)) * 1 * xpMult);
+  const winnerxp = (Math.min((1 / winner.level * loser.level), 5) * 5);
+  const loserxp = ((1 / loser.level * Math.min(winner.level, 5)) * 1);
   winner.xp += winnerxp;
   loser.xp += loserxp;
 
