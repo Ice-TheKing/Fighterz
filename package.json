@@ -11,8 +11,8 @@
     "buildLoginBundle": "babel ./client/login ./client/helper --presets react --out-file ./hosted/loginBundle.js",
     "buildAppBundle": "babel ./client/app ./client/helper --presets react --out-file ./hosted/bundle.js",
     "watch": "gulp watch",
-    "gulpBuild": "gulp build",
-    "build": "",
+    "build": "gulp build",
+    "emptybuild": "",
     "watchLoginBundle": "babel --watch ./client/login ./client/helper --presets react --out-file ./hosted/loginBundle.js",
     "watchAppBundle": "babel --watch ./client/app ./client/helper --presets react --out-file ./hosted/bundle.js",
     "nodemon": "nodemon --watch ./server ./server/app.js",
@@ -47,18 +47,23 @@
     "underscore": "^1.11.0"
   },
   "devDependencies": {
+    "@babel/cli": "^7.12.1",
+    "@babel/core": "^7.12.3",
+    "@babel/preset-env": "^7.12.1",
+    "@babel/preset-react": "^7.12.1",
     "babel-cli": "^6.18.0",
     "babel-preset-env": "^1.1.8",
     "babel-preset-react": "^6.24.1",
-    "eslint": "^3.0.0",
-    "eslint-config-airbnb": "^9.0.1",
-    "eslint-plugin-import": "^1.10.1",
+    "eslint": "^7.11.0",
+    "eslint-config-airbnb": "^18.2.1",
+    "eslint-plugin-import": "^2.22.1",
     "gulp": "^4.0.2",
-    "gulp-babel": "^6.1.2",
-    "gulp-eslint": "^3.0.1",
+    "gulp-babel": "^8.0.0",
+    "gulp-eslint": "^6.0.0",
     "gulp-nodemon": "^2.5.0",
-    "gulp-sass": "^3.1.0",
+    "gulp-sass": "^4.1.0",
+    "gulp-cached": "^1.1.1",
     "node-sass": "^4.14.1",
-    "nodemon": "^1.19.4"
+    "nodemon": "^2.0.6"
   }
 }

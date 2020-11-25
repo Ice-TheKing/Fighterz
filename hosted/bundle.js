@@ -79,7 +79,7 @@ var FighterForm = function FighterForm(props) {
           React.createElement(
             'label',
             { 'for': 'health' },
-            React.createElement('input', { id: 'fighterHealth', name: 'health', value: '1', min: '1', max: '15' }),
+            React.createElement('input', { type: 'range', id: 'fighterHealth', name: 'health', min: '1', max: '15' }),
             'Health'
           )
         )

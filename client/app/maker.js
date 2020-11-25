@@ -69,7 +69,7 @@ const FighterForm = (props) => {
         <div className="input-field col s4">
           <p className="range-field">
             <label for="health">
-              <input id="fighterHealth" name="health" value="1" min="1" max="15"/>
+              <input type="range" id="fighterHealth" name="health" min="1" max="15"/>
             Health</label>
           </p>
         </div>

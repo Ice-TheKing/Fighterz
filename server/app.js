@@ -30,7 +30,8 @@ let redisPASS;
 
 if (process.env.REDISCLOUD_URL) {
   redisURL = url.parse(process.env.REDISCLOUD_URL);
-  redisPASS = redisURL.auth.split(':')[1];
+  // redisPASS = redisURL.auth.split(':')[1]; // old syntax
+  [,redisPASS] = redisURL.auth.split(':'); // fancy es6
 }
 
 // pull in the routes

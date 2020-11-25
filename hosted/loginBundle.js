@@ -2,7 +2,6 @@
 
 var handleLogin = function handleLogin(e) {
   e.preventDefault();
-
   $("#fighterMessage").animate({ width: 'hide' }, 350);
 
   if ($("#user").val() == '' || $("pass").val() == '') {
@@ -94,6 +93,7 @@ var SignupWindow = function SignupWindow(props) {
 };
 
 var createLoginWindow = function createLoginWindow(csrf) {
+  console.dir('creating the login window');
   ReactDOM.render(React.createElement(LoginWindow, { csrf: csrf }), document.querySelector("#content"));
 };
 

@@ -1,6 +1,5 @@
 const handleLogin = (e) => {
   e.preventDefault();
-  
   $("#fighterMessage").animate({width:'hide'},350);
   
   if($("#user").val() == '' || $("pass").val() == '') {
@@ -72,6 +71,7 @@ const SignupWindow = (props) => {
 };
 
 const createLoginWindow = (csrf) => {
+  console.dir('creating the login window');
   ReactDOM.render(
     <LoginWindow csrf={csrf} />,
     document.querySelector("#content")
