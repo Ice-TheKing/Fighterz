@@ -96,6 +96,7 @@ const makeFighter = (req, res) => {
   const fights = 0;
   const kills = 0;
   const revivals = 0;
+  const logs = '';
 
   if (!name || !health || !damage || !speed || !armor || !crit) {
     return res.status(400).json({ error: 'All fighter stats required' });
@@ -145,6 +146,7 @@ const makeFighter = (req, res) => {
       fights,
       kills,
       revivals,
+      logs,
       username: req.session.username,
       account: req.session.account._id,
     };

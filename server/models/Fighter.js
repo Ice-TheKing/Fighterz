@@ -100,6 +100,12 @@ const FighterSchema = new mongoose.Schema({
     min: 0,
     required: true,
   },
+  
+  logs: {
+    type: String,
+    required: false,
+    trim: true,
+  },
 
   username: {
     type: String,
@@ -165,6 +171,7 @@ FighterSchema.statics.findByAccount = (accountId, callback) => {
   selection = `${selection} kills`;
   selection = `${selection} revivals`;
   selection = `${selection} levelupPts`;
+  selection = `${selection} logs`;
 
   return FighterModel.find(search)
     .select(selection)
@@ -190,6 +197,7 @@ FighterSchema.statics.findAll = (callback) => {
   selection = `${selection} kills`;
   selection = `${selection} revivals`;
   selection = `${selection} levelupPts`;
+  selection = `${selection} logs`;
 
   return FighterModel.find(search)
     .select(selection)

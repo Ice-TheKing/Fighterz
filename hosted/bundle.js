@@ -716,14 +716,14 @@ var YourFighterList = function YourFighterList(props) {
               React.createElement(
                 'p',
                 null,
-                'Wins: ',
-                fighter.wins
+                'Fights: ',
+                fighter.fights
               ),
               React.createElement(
                 'p',
                 null,
-                'Fights: ',
-                fighter.fights
+                'Wins: ',
+                fighter.wins
               ),
               React.createElement(
                 'p',
@@ -829,10 +829,32 @@ var AllFighterList = function AllFighterList(props) {
     i++;
     var dropdownId = 'dropdown' + i + '-' + fighter.account;
     var title = fighter.name + '-' + fighter.account;
+    var logId = 'log' + i + '-' + fighter.account;
 
     // for setting up each card as a modal
     var modalhref = 'modal' + i;
     var modalhrefId = '#' + modalhref;
+
+    var currentFighterLogs = fighter.logs.split('~');
+    // TODO: Every log has an empty index at the end. Fix it lol
+    currentFighterLogs.pop();
+
+    var logNodes = currentFighterLogs.map(function (log) {
+      var logLines = log.split('&');
+      var logTitle = logLines[0];
+      return React.createElement(
+        'li',
+        null,
+        React.createElement(
+          'a',
+          { href: '#' },
+          logTitle
+        )
+      );
+    });
+
+    // used to retrieve fighter logs
+    var id = fighter.name + '-' + fighter.account;
 
     // if a fighter is dead, don't display it
     if (fighter.health != 0) return React.createElement(
@@ -904,14 +926,14 @@ var AllFighterList = function AllFighterList(props) {
               { className: 'modal-content card-content dark-purple lighten-1 white-text' },
               React.createElement(
                 'a',
-                { className: 'dropdown-trigger soft-violet right waves-effect waves-light', 'data-target': '325' },
+                { className: 'dropdown-trigger soft-violet right waves-effect waves-light', 'data-target': logId },
                 'Logs'
               ),
               React.createElement('br', null),
               React.createElement(
                 'ul',
-                { id: '325', className: 'dropdown-content' },
-                yourFighterNodes
+                { id: logId, className: 'dropdown-content' },
+                logNodes
               ),
               React.createElement(
                 'span',
@@ -933,14 +955,14 @@ var AllFighterList = function AllFighterList(props) {
               React.createElement(
                 'p',
                 null,
-                'Wins: ',
-                fighter.wins
+                'Fights: ',
+                fighter.fights
               ),
               React.createElement(
                 'p',
                 null,
-                'Fights: ',
-                fighter.fights
+                'Wins: ',
+                fighter.wins
               ),
               React.createElement(
                 'p',

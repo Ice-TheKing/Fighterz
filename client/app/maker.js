@@ -431,8 +431,8 @@ const YourFighterList = function(props) {
                 {reviveBtn}
                 <p className="levelField">Level {fighter.level}</p>
                 <p>xp: {fighter.xp.toFixed(1)}/{fighter.xpToNext}</p>
-                <p>Wins: {fighter.wins}{/*({(100*fighter.wins/fighter.fights).toFixed(1)}%)*/}</p>
                 <p>Fights: {fighter.fights}</p>
+                <p>Wins: {fighter.wins}{/*({(100*fighter.wins/fighter.fights).toFixed(1)}%)*/}</p>
                 <p>Kills: {fighter.kills}</p>
                 <p>Revivals: {fighter.revivals}</p>
                 <br></br>
@@ -460,7 +460,7 @@ const YourFighterList = function(props) {
   );
 };
 
-const AllFighterList = function(props) {  
+const AllFighterList = function(props) {
   if(props.fighters.length === 0) {
     return (
       <div className="fighterList">
@@ -486,10 +486,27 @@ const AllFighterList = function(props) {
     i++;
     const dropdownId = `dropdown${i}-${fighter.account}`;
     const title = `${fighter.name}-${fighter.account}`;
+    const logId = `log${i}-${fighter.account}`;
     
     // for setting up each card as a modal
     const modalhref = `modal${i}`;
     const modalhrefId = `#${modalhref}`;
+    
+    let currentFighterLogs = fighter.logs.split('~');
+    // TODO: Every log has an empty index at the end. Fix it lol
+    currentFighterLogs.pop();
+    
+    let logNodes = currentFighterLogs.map(function(log) {
+      const logLines = log.split('&');
+      const logTitle = logLines[0];
+      return (
+        <li><a href="#">{logTitle}</a></li>
+      );
+    });
+    
+    
+    // used to retrieve fighter logs
+    const id = `${fighter.name}-${fighter.account}`;
     
     // if a fighter is dead, don't display it
     if(fighter.health != 0) return (
@@ -508,16 +525,16 @@ const AllFighterList = function(props) {
             </div>
             <div id={modalhref} className="modal">
               <div className="modal-content card-content dark-purple lighten-1 white-text">
-                  <a className="dropdown-trigger soft-violet right waves-effect waves-light" data-target='325'>Logs</a><br></br>
-                  <ul id='325' className='dropdown-content'>
-                    {yourFighterNodes}
+                  <a className="dropdown-trigger soft-violet right waves-effect waves-light" data-target={logId}>Logs</a><br></br>
+                  <ul id={logId} className='dropdown-content'>
+                    {logNodes}
                   </ul>
                   <span className="card-title">{fighter.name}</span>
                   <p className="accountField">Created By {fighter.username}</p>
                   <p className="levelField">Level {fighter.level}</p>
                   {/*<p>xp: {fighter.xp.toFixed(1)}/{fighter.xpToNext}</p>*/}
-                  <p>Wins: {fighter.wins}{/*({(100*fighter.wins/fighter.fights).toFixed(1)}%)*/}</p>
                   <p>Fights: {fighter.fights}</p>
+                  <p>Wins: {fighter.wins}{/*({(100*fighter.wins/fighter.fights).toFixed(1)}%)*/}</p>
                   <p>Kills: {fighter.kills}</p>
                   <p>Revivals: {fighter.revivals}</p>
                   <br></br>

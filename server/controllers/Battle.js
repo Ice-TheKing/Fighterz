@@ -32,9 +32,6 @@ const handleGameEnd = (wnr, lsr, log, callback) => {
   winner.xp += winnerxp;
   loser.xp += loserxp;
 
-  battleLog.push(`${winner.name} has earned ${winnerxp}xp`);
-  battleLog.push(`${loser.name} has earned ${loserxp}xp`);
-
   // check to see if they leveled up
   // this is a while loop in case somehow they leveled up a bunch of times
   while (winner.xp > winner.xpToNext) {
@@ -89,8 +86,15 @@ const handleGameEnd = (wnr, lsr, log, callback) => {
   } else {
     battleLog.push(`${winner.name} defeated ${loser.name}`);
   }
-
-  console.dir(battleLog);
+  
+  battleLog.push(`${winner.name} has earned ${winnerxp}xp`);
+  battleLog.push(`${loser.name} has earned ${loserxp}xp`);
+  
+  // update logs:
+  // ~ separates battles
+  // & separates lines in each battle log
+  winner.logs = `${battleLog.join('&')}~${winner.logs}`;
+  loser.logs = `${battleLog.join('&')}~${loser.logs}`;
 
   // update database
   const winnerPromise = winner.save();
@@ -230,6 +234,8 @@ const runFight = (request, response) => {
 
       // array of strings to hold information about the battle
       const battleLog = [];
+      
+      battleLog.push(`${fighter1.name} vs ${fighter2.name}`);
 
       let winner;
       let loser;
@@ -324,7 +330,7 @@ const runFight = (request, response) => {
         // return the last log as a message, which should say whether a fighter
         // defeated or killed the other
         return handleGameEnd(winner, loser, battleLog,
-                             () => res.json({ message: battleLog[battleLog.length - 1] }));
+                             () => res.json({ message: battleLog[battleLog.length - 3] }));
       }
 
       return res.json({ error: 'An error occurred' });
