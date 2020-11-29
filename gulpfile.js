@@ -4,45 +4,8 @@ const sass = require('gulp-sass');
 const babel = require('gulp-babel');
 const nodemon = require('gulp-nodemon');
 const eslint = require('gulp-eslint');
+const concat = require('gulp-concat');
 
-// gulp.task('sass', (cb) => {
-//   gulp.src('./sass/**/*.scss')
-//     .pipe(sass().on('error', sass.logError))
-//     .pipe(gulp.dest('./hosted/'));
-//   cb();
-// });
-// 
-// // babel
-// gulp.task('js', (cb) => {
-//   gulp.src('./client/*.js')
-//     .pipe(babel({
-//       presets: ['env', 'react']
-//     }))
-//     .pipe(gulp.dest('./hosted'))
-//   cb();
-// });
-// 
-// // return so the program stops if there's an error
-// gulp.task('lint', (cb) => {
-//   return gulp.src(['./server/*.js'])
-//     .pipe(eslint())
-//     .pipe(eslint.format())
-//     .pipe(eslint.failAfterError());
-//   cb();
-// });
-// 
-// gulp.task('watch', (cb) => {
-//   gulp.watch('./sass/**/*.scss', gulp.series('sass'));
-//   gulp.watch('./client/*.js', gulp.series('js'));
-//   
-//   nodemon({ script: './server/app.js'
-//           , ext: 'js'
-//           , tasks: ['lint'] })
-//   
-//   cb();
-// });
-// 
-// gulp.task('build', gulp.parallel('sass', 'js', 'lint'));
 
 const sassTask = (done) => {
   gulp.src('./sass/**/*.scss')
@@ -53,12 +16,23 @@ const sassTask = (done) => {
   done();
 };
 
-const jsTask = (done) => {
-  gulp.src(['./client/*.js', './client/*.jsx'])
-  .pipe(cache('babel'))
+const bundleTask = (done) => {
+  gulp.src(['./client/app/maker.js', './client/helper/helper.js'])
   .pipe(babel({
     presets: ['@babel/preset-env', '@babel/preset-react']
   }))
+  .pipe(concat('bundle.js'))
+  .pipe(gulp.dest('./hosted/'));
+  
+  done();
+};
+
+const loginBundleTask = (done) => {
+  gulp.src(['./client/login/client.js', './client/helper/helper.js'])
+  .pipe(babel({
+    presets: ['@babel/preset-env', '@babel/preset-react']
+  }))
+  .pipe(concat('loginBundle.js'))
   .pipe(gulp.dest('./hosted/'));
   
   done();
@@ -73,11 +47,12 @@ const lintTask = (done) => {
   done();
 };
 
-module.exports.build = gulp.parallel(sassTask, jsTask, lintTask);
+module.exports.build = gulp.parallel(sassTask, bundleTask, loginBundleTask, lintTask);
 
 const watch = () => {
   gulp.watch('./sass/**/*.scss', sassTask);
-  gulp.watch(['./client/*.js', './client/*.jsx'], jsTask);
+  gulp.watch(['./client/app/maker.js', './client/helper/helper.js'], bundleTask);
+  gulp.watch(['./client/login/client.js', './client/helper/helper.js'], loginBundleTask);
   
   nodemon({
     script: './server/app.js',
