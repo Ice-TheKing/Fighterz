@@ -235,15 +235,12 @@ const StorePage = (props) => {
   );
 };
 
-
-
 const handleBuyRevival = (e) => {
   let csrf = $("#_csrf").val();
   sendAjax('POST', '/addRevivals', `revivals=1&_csrf=${csrf}`, redirect);
 };
 
 const BuyDiamondsPage = (props) => {
-  console.dir('in buy diamonds page');
   return (
     <form id="buyDiamondsForm" name="buyDiamondsForm">
       <div className="container">
@@ -526,15 +523,9 @@ const AllFighterList = function(props) {
     // TODO: Every log has an empty index at the end. Fix it lol
     currentFighterLogs.pop();
     
-    let logIndex = 0;
-    
-    let logNodes = currentFighterLogs.map(function(log) {
-      const loghref = `logModal${logIndex}`;
-      const loghrefId = `#${logId}`;
-      
+    let logNodes = currentFighterLogs.map(function(log) {      
       const logLines = log.split('&');
       const logTitle = logLines[0];
-      logIndex++;
       // TODO: give the container div some sort of meaningful id/class
       
       let renderBattleLog = () => {
@@ -545,7 +536,7 @@ const AllFighterList = function(props) {
         <div>
           <li><a className="battleLog" href="#" onClick={renderBattleLog}>{logTitle}</a></li>
         </div>
-      )
+      );
     });
     
     
@@ -745,18 +736,6 @@ const setupBattleLogPage = function(logs) {
     <BattleLogForm csrf={csrf} logs={logs} />, document.querySelector("#content")
   );
 };
-
-/*const setupBattleLogPage = function(csrf) {
-  console.dir('function setup BLP');
-  console.dir(csrf);
-  
-  csrf = ${"#_csrf"}.val();
-  console.dir(csrf);
-  
-  /*ReactDom.render(
-    <battleLogForm csrf={csrf} />, document.querySelector("#content")
-  );
-};*/
 
 /// sets up click events for the navigation buttons to re-render the page with react
 const setupNavButtons = function(csrf) {

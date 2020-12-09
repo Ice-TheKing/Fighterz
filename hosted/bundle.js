@@ -307,7 +307,6 @@ var handleBuyRevival = function handleBuyRevival(e) {
 };
 
 var BuyDiamondsPage = function BuyDiamondsPage(props) {
-  console.dir('in buy diamonds page');
   return /*#__PURE__*/React.createElement("form", {
     id: "buyDiamondsForm",
     name: "buyDiamondsForm"
@@ -598,13 +597,9 @@ var AllFighterList = function AllFighterList(props) {
     var currentFighterLogs = fighter.logs.split('~'); // TODO: Every log has an empty index at the end. Fix it lol
 
     currentFighterLogs.pop();
-    var logIndex = 0;
     var logNodes = currentFighterLogs.map(function (log) {
-      var loghref = "logModal".concat(logIndex);
-      var loghrefId = "#".concat(logId);
       var logLines = log.split('&');
-      var logTitle = logLines[0];
-      logIndex++; // TODO: give the container div some sort of meaningful id/class
+      var logTitle = logLines[0]; // TODO: give the container div some sort of meaningful id/class
 
       var renderBattleLog = function renderBattleLog() {
         setupBattleLogPage(logLines);
@@ -794,19 +789,7 @@ var setupBattleLogPage = function setupBattleLogPage(logs) {
     csrf: csrf,
     logs: logs
   }), document.querySelector("#content"));
-};
-/*const setupBattleLogPage = function(csrf) {
-  console.dir('function setup BLP');
-  console.dir(csrf);
-  
-  csrf = ${"#_csrf"}.val();
-  console.dir(csrf);
-  
-  /*ReactDom.render(
-    <battleLogForm csrf={csrf} />, document.querySelector("#content")
-  );
-};*/
-/// sets up click events for the navigation buttons to re-render the page with react
+}; /// sets up click events for the navigation buttons to re-render the page with react
 
 
 var setupNavButtons = function setupNavButtons(csrf) {
