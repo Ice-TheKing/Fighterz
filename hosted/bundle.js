@@ -307,6 +307,7 @@ var handleBuyRevival = function handleBuyRevival(e) {
 };
 
 var BuyDiamondsPage = function BuyDiamondsPage(props) {
+  console.dir('in buy diamonds page');
   return /*#__PURE__*/React.createElement("form", {
     id: "buyDiamondsForm",
     name: "buyDiamondsForm"
@@ -419,6 +420,28 @@ var handleRevive = function handleRevive(e) {
     sendToast('Fighter has been revived');
     loadFightersFromServer();
   });
+}; // TODO: move this function. Actually honestly, break every page out into its own app file
+
+
+var BattleLogForm = function BattleLogForm(props) {
+  console.dir('in battleLogForm'); //console.dir(props);
+
+  var logTitle = props.logs.shift(); // TODO: format this
+  // print out each log
+
+  var logNodes = props.logs.map(function (log) {
+    return /*#__PURE__*/React.createElement("div", {
+      className: "log"
+    }, /*#__PURE__*/React.createElement("p", null, log));
+  });
+  return /*#__PURE__*/React.createElement("div", {
+    className: "logList row"
+  }, /*#__PURE__*/React.createElement("h4", null, logTitle), logNodes, /*#__PURE__*/React.createElement("input", {
+    type: "hidden",
+    id: "_csrf",
+    name: "_csrf",
+    value: props.csrf
+  }));
 }; /// Renders all fighters owned by player
 
 
@@ -575,12 +598,23 @@ var AllFighterList = function AllFighterList(props) {
     var currentFighterLogs = fighter.logs.split('~'); // TODO: Every log has an empty index at the end. Fix it lol
 
     currentFighterLogs.pop();
+    var logIndex = 0;
     var logNodes = currentFighterLogs.map(function (log) {
+      var loghref = "logModal".concat(logIndex);
+      var loghrefId = "#".concat(logId);
       var logLines = log.split('&');
       var logTitle = logLines[0];
-      return /*#__PURE__*/React.createElement("li", null, /*#__PURE__*/React.createElement("a", {
-        href: "#"
-      }, logTitle));
+      logIndex++; // TODO: give the container div some sort of meaningful id/class
+
+      var renderBattleLog = function renderBattleLog() {
+        setupBattleLogPage(logLines);
+      };
+
+      return /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("li", null, /*#__PURE__*/React.createElement("a", {
+        className: "battleLog",
+        href: "#",
+        onClick: renderBattleLog
+      }, logTitle)));
     }); // used to retrieve fighter logs
 
     var id = "".concat(fighter.name, "-").concat(fighter.account); // if a fighter is dead, don't display it
@@ -752,7 +786,27 @@ var setupBuyDiamondsPage = function setupBuyDiamondsPage(csrf) {
     csrf: csrf
   }), document.querySelector("#content"));
   updateUrl('/buyDiamonds', setupBuyDiamondsPage);
-}; /// sets up click events for the navigation buttons to re-render the page with react
+};
+
+var setupBattleLogPage = function setupBattleLogPage(logs) {
+  var csrf = $("#_csrf").val();
+  ReactDOM.render( /*#__PURE__*/React.createElement(BattleLogForm, {
+    csrf: csrf,
+    logs: logs
+  }), document.querySelector("#content"));
+};
+/*const setupBattleLogPage = function(csrf) {
+  console.dir('function setup BLP');
+  console.dir(csrf);
+  
+  csrf = ${"#_csrf"}.val();
+  console.dir(csrf);
+  
+  /*ReactDom.render(
+    <battleLogForm csrf={csrf} />, document.querySelector("#content")
+  );
+};*/
+/// sets up click events for the navigation buttons to re-render the page with react
 
 
 var setupNavButtons = function setupNavButtons(csrf) {

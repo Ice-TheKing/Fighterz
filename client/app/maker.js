@@ -235,12 +235,15 @@ const StorePage = (props) => {
   );
 };
 
+
+
 const handleBuyRevival = (e) => {
   let csrf = $("#_csrf").val();
   sendAjax('POST', '/addRevivals', `revivals=1&_csrf=${csrf}`, redirect);
 };
 
 const BuyDiamondsPage = (props) => {
+  console.dir('in buy diamonds page');
   return (
     <form id="buyDiamondsForm" name="buyDiamondsForm">
       <div className="container">
@@ -352,6 +355,33 @@ const handleRevive = (e) => {
     loadFightersFromServer();
   });
 }
+
+// TODO: move this function. Actually honestly, break every page out into its own app file
+const BattleLogForm = (props) => {
+  console.dir('in battleLogForm');
+  //console.dir(props);
+  
+  let logTitle = props.logs.shift();
+  
+  // TODO: format this
+  
+  // print out each log
+  let logNodes = props.logs.map(function(log) {
+    return (
+      <div className="log">
+        <p>{log}</p>
+      </div>
+    );
+  });
+  
+  return (
+    <div className="logList row">
+      <h4>{logTitle}</h4>
+      {logNodes}
+      <input type="hidden" id="_csrf" name="_csrf" value={props.csrf} />
+    </div>
+  );
+};
 
 /// Renders all fighters owned by player
 const YourFighterList = function(props) {
@@ -496,12 +526,26 @@ const AllFighterList = function(props) {
     // TODO: Every log has an empty index at the end. Fix it lol
     currentFighterLogs.pop();
     
+    let logIndex = 0;
+    
     let logNodes = currentFighterLogs.map(function(log) {
+      const loghref = `logModal${logIndex}`;
+      const loghrefId = `#${logId}`;
+      
       const logLines = log.split('&');
       const logTitle = logLines[0];
+      logIndex++;
+      // TODO: give the container div some sort of meaningful id/class
+      
+      let renderBattleLog = () => {
+        setupBattleLogPage(logLines);
+      };
+      
       return (
-        <li><a href="#">{logTitle}</a></li>
-      );
+        <div>
+          <li><a className="battleLog" href="#" onClick={renderBattleLog}>{logTitle}</a></li>
+        </div>
+      )
     });
     
     
@@ -692,7 +736,27 @@ const setupBuyDiamondsPage = function(csrf) {
   );
   
   updateUrl('/buyDiamonds', setupBuyDiamondsPage);
-}
+};
+
+const setupBattleLogPage = function(logs) {
+  let csrf = $("#_csrf").val();
+  
+  ReactDOM.render(
+    <BattleLogForm csrf={csrf} logs={logs} />, document.querySelector("#content")
+  );
+};
+
+/*const setupBattleLogPage = function(csrf) {
+  console.dir('function setup BLP');
+  console.dir(csrf);
+  
+  csrf = ${"#_csrf"}.val();
+  console.dir(csrf);
+  
+  /*ReactDom.render(
+    <battleLogForm csrf={csrf} />, document.querySelector("#content")
+  );
+};*/
 
 /// sets up click events for the navigation buttons to re-render the page with react
 const setupNavButtons = function(csrf) {
