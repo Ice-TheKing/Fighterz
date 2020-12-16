@@ -355,9 +355,6 @@ const handleRevive = (e) => {
 
 // TODO: move this function. Actually honestly, break every page out into its own app file
 const BattleLogForm = (props) => {
-  console.dir('in battleLogForm');
-  //console.dir(props);
-  
   let logTitle = props.logs.shift();
   
   // TODO: format this
@@ -523,7 +520,7 @@ const AllFighterList = function(props) {
     // TODO: Every log has an empty index at the end. Fix it lol
     currentFighterLogs.pop();
     
-    let logNodes = currentFighterLogs.map(function(log) {      
+    let logNodes = currentFighterLogs.map(function(log) {
       const logLines = log.split('&');
       const logTitle = logLines[0];
       // TODO: give the container div some sort of meaningful id/class

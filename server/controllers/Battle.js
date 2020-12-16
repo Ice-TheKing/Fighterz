@@ -68,9 +68,10 @@ const handleGameEnd = (wnr, lsr, log, callback) => {
 
   const chanceToDie = 100 * (deathRatio * deathRatio); // 100 * deathRatio^2
 
-  console.log(`temp health: ${loser.tempHealth} | max health: ${loser.maxHealth}`);
-  console.log(`deathRatio: ${deathRatio}`);
-  console.log(`chanceToDie: ${chanceToDie}%`);
+  // death debug:
+  //console.log(`temp health: ${loser.tempHealth} | max health: ${loser.maxHealth}`);
+  //console.log(`deathRatio: ${deathRatio}`);
+  //console.log(`chanceToDie: ${chanceToDie}%`);
 
   if (deathMatch) {
     // check to see if the loser died
@@ -95,6 +96,12 @@ const handleGameEnd = (wnr, lsr, log, callback) => {
   // & separates lines in each battle log
   winner.logs = `${battleLog.join('&')}~${winner.logs}`;
   loser.logs = `${battleLog.join('&')}~${loser.logs}`;
+  
+  // trim the logs if there are more than 50 attached to this fighter (trim down to 30)
+  const maxLogLength = 50;
+  const trimTo = 30;
+  winner.logs = trimLogs(winner.logs, maxLogLength, trimTo);
+  loser.logs = trimLogs(loser.logs, maxLogLength, trimTo);
 
   // update database
   const winnerPromise = winner.save();
@@ -104,6 +111,18 @@ const handleGameEnd = (wnr, lsr, log, callback) => {
       // all good. Both are saved
        callback());
   });
+};
+
+const trimLogs = (logStr, maxLogLength, trimTo) => {
+  let logs = logStr.split('~');
+  
+  if (logs.length >= maxLogLength) {
+    const spliced = logs.splice(trimTo);
+    logs = logs.join("~");
+    return logs;
+  }
+  
+  return logStr;
 };
 
 // returns how much damage is blocked given attacker damage and defender armor

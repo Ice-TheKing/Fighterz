@@ -44,7 +44,6 @@ ul {
     width: 350px;
     margin: 0 auto;
     font-size: 1.2em;
-    
 }
 
 .mainForm label {
@@ -53,6 +52,11 @@ ul {
     margin-right: 10px;
     text-align: right;
     font-size: 1.2em;
+}
+
+.logList {
+  overflow-y:auto;
+  height: 80%;
 }
 
 .card {

@@ -423,8 +423,6 @@ var handleRevive = function handleRevive(e) {
 
 
 var BattleLogForm = function BattleLogForm(props) {
-  console.dir('in battleLogForm'); //console.dir(props);
-
   var logTitle = props.logs.shift(); // TODO: format this
   // print out each log
 
