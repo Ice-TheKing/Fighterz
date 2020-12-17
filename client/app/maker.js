@@ -304,8 +304,6 @@ const increaseMaxFighters = (e) => {
 };
 
 const startFight = (e) => {
-  // console.dir(e.target.id);
-  // console.dir(e.target.parentElement.parentElement.title);
   const ourFighter = e.target.parentElement.parentElement.title.split("-");
   const theirFighter = e.target.id.split("-");
   const csrf = $("#_csrf").val();
@@ -320,7 +318,6 @@ const startFight = (e) => {
 };
 
 const handleUpgrade = (e) => {
-  // console.dir(e.target.id);
   // format for id is 'fighterName-stat'
   // so we just have to split it to get the pieces of the form
   const nameStat = e.target.id.split("-");
@@ -331,7 +328,6 @@ const handleUpgrade = (e) => {
   let form = `name=${name}`;
   form = `${form}&stat=${stat}`;
   form = `${form}&_csrf=${csrf}`;
-  // console.dir(`name: ${name} account:${acct} stat: ${stat}`);
   
   // send the ajax
   sendAjax('POST', '/upgradeFighter', `${form}`, () => {
@@ -401,11 +397,35 @@ const YourFighterList = function(props) {
       // displayed as the fighter level, so the user knows how many points they have to spend
       const fighterLevel = `${fighter.level-fighter.levelupPts} + ${fighter.levelupPts}`;
       
+      const logId = `log${fighter._id}`;
+      
+      let currentFighterLogs = fighter.logs.split('~');
+      // TODO: Every log has an empty index at the end. Fix it lol
+      currentFighterLogs.pop();
+      
+      let logNodes = currentFighterLogs.map(function(log) {
+        const logLines = log.split('&');
+        const logTitle = logLines[0];
+        // TODO: give the container div some sort of meaningful id/class
+        
+        let renderBattleLog = () => {
+          setupBattleLogPage(logLines);
+        };
+        
+        return (
+          <li><a className="battleLog" href="#" onClick={renderBattleLog}>{logTitle}</a></li>
+        );
+      });
+      
       return (
         <div key={fighter._id} className="fighter">
           <div className="col s12 m12">
             <div className="card dark-purple lighten-1">
               <div className="card-content white-text">
+                <a className="dropdown-trigger soft-violet right waves-effect waves-light" data-target={logId}>Logs</a><br></br>
+                <ul id={logId} className='dropdown-content'>
+                  {logNodes}
+                </ul>
                 <span className="card-title">{fighter.name}</span><p></p>
                 <p className="levelField">Level {fighterLevel}</p>
                 <p>xp: {fighter.xp.toFixed(1)}/{fighter.xpToNext}</p>
@@ -503,17 +523,15 @@ const AllFighterList = function(props) {
     );
   });
   
-  let i = 0;  
   const fighterNodes = props.fighters.map(function(fighter) {
     // have to use some sort of iterator to key each dropdown lists ids, otherwise some dropdowns
     // might refer to a random different dropdown
-    i++;
     const dropdownId = `dropdown${i}-${fighter.account}`;
     const title = `${fighter.name}-${fighter.account}`;
-    const logId = `log${i}-${fighter.account}`;
+    const logId = `log${fighter._id}-${fighter.account}`;
     
     // for setting up each card as a modal
-    const modalhref = `modal${i}`;
+    const modalhref = `modal${fighter._id}`;
     const modalhrefId = `#${modalhref}`;
     
     let currentFighterLogs = fighter.logs.split('~');
@@ -530,9 +548,7 @@ const AllFighterList = function(props) {
       };
       
       return (
-        <div>
-          <li><a className="battleLog" href="#" onClick={renderBattleLog}>{logTitle}</a></li>
-        </div>
+        <li><a className="battleLog" href="#" onClick={renderBattleLog}>{logTitle}</a></li>
       );
     });
     
@@ -608,6 +624,9 @@ const loadFightersFromServer = () => {
         <YourFighterList fighters={data.fighters} revivals={revivalData.revivals} csrf={csrf} />,
         document.querySelector("#content")
       );
+      
+      // set up materialize elements
+      $('.dropdown-trigger').dropdown();
     });
   });
 };
@@ -689,7 +708,6 @@ const setupStorePage = function(csrf) {
   
   // get diamonds
   sendAjax('GET', '/getRevivals', null, (data) => {
-    console.dir(data.revivals);
     ReactDOM.render(
       <StorePage csrf={csrf} revivals={data.revivals} />, document.querySelector("#content")
     );

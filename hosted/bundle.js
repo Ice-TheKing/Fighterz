@@ -378,8 +378,6 @@ var increaseMaxFighters = function increaseMaxFighters(e) {
 };
 
 var startFight = function startFight(e) {
-  // console.dir(e.target.id);
-  // console.dir(e.target.parentElement.parentElement.title);
   var ourFighter = e.target.parentElement.parentElement.title.split("-");
   var theirFighter = e.target.id.split("-");
   var csrf = $("#_csrf").val();
@@ -392,7 +390,6 @@ var startFight = function startFight(e) {
 };
 
 var handleUpgrade = function handleUpgrade(e) {
-  // console.dir(e.target.id);
   // format for id is 'fighterName-stat'
   // so we just have to split it to get the pieces of the form
   var nameStat = e.target.id.split("-");
@@ -401,8 +398,7 @@ var handleUpgrade = function handleUpgrade(e) {
   var csrf = $("#_csrf").val();
   var form = "name=".concat(name);
   form = "".concat(form, "&stat=").concat(stat);
-  form = "".concat(form, "&_csrf=").concat(csrf); // console.dir(`name: ${name} account:${acct} stat: ${stat}`);
-  // send the ajax
+  form = "".concat(form, "&_csrf=").concat(csrf); // send the ajax
 
   sendAjax('POST', '/upgradeFighter', "".concat(form), function () {
     loadFightersFromServer();
@@ -468,6 +464,24 @@ var YourFighterList = function YourFighterList(props) {
       var critId = "".concat(fighter.name, "-crit"); // displayed as the fighter level, so the user knows how many points they have to spend
 
       var fighterLevel = "".concat(fighter.level - fighter.levelupPts, " + ").concat(fighter.levelupPts);
+      var logId = "log".concat(fighter._id);
+      var currentFighterLogs = fighter.logs.split('~'); // TODO: Every log has an empty index at the end. Fix it lol
+
+      currentFighterLogs.pop();
+      var logNodes = currentFighterLogs.map(function (log) {
+        var logLines = log.split('&');
+        var logTitle = logLines[0]; // TODO: give the container div some sort of meaningful id/class
+
+        var renderBattleLog = function renderBattleLog() {
+          setupBattleLogPage(logLines);
+        };
+
+        return /*#__PURE__*/React.createElement("li", null, /*#__PURE__*/React.createElement("a", {
+          className: "battleLog",
+          href: "#",
+          onClick: renderBattleLog
+        }, logTitle));
+      });
       return /*#__PURE__*/React.createElement("div", {
         key: fighter._id,
         className: "fighter"
@@ -477,7 +491,13 @@ var YourFighterList = function YourFighterList(props) {
         className: "card dark-purple lighten-1"
       }, /*#__PURE__*/React.createElement("div", {
         className: "card-content white-text"
-      }, /*#__PURE__*/React.createElement("span", {
+      }, /*#__PURE__*/React.createElement("a", {
+        className: "dropdown-trigger soft-violet right waves-effect waves-light",
+        "data-target": logId
+      }, "Logs"), /*#__PURE__*/React.createElement("br", null), /*#__PURE__*/React.createElement("ul", {
+        id: logId,
+        className: "dropdown-content"
+      }, logNodes), /*#__PURE__*/React.createElement("span", {
         className: "card-title"
       }, fighter.name), /*#__PURE__*/React.createElement("p", null), /*#__PURE__*/React.createElement("p", {
         className: "levelField"
@@ -588,9 +608,9 @@ var AllFighterList = function AllFighterList(props) {
     i++;
     var dropdownId = "dropdown".concat(i, "-").concat(fighter.account);
     var title = "".concat(fighter.name, "-").concat(fighter.account);
-    var logId = "log".concat(i, "-").concat(fighter.account); // for setting up each card as a modal
+    var logId = "log".concat(fighter._id, "-").concat(fighter.account); // for setting up each card as a modal
 
-    var modalhref = "modal".concat(i);
+    var modalhref = "modal".concat(fighter._id);
     var modalhrefId = "#".concat(modalhref);
     var currentFighterLogs = fighter.logs.split('~'); // TODO: Every log has an empty index at the end. Fix it lol
 
@@ -603,11 +623,11 @@ var AllFighterList = function AllFighterList(props) {
         setupBattleLogPage(logLines);
       };
 
-      return /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("li", null, /*#__PURE__*/React.createElement("a", {
+      return /*#__PURE__*/React.createElement("li", null, /*#__PURE__*/React.createElement("a", {
         className: "battleLog",
         href: "#",
         onClick: renderBattleLog
-      }, logTitle)));
+      }, logTitle));
     }); // used to retrieve fighter logs
 
     var id = "".concat(fighter.name, "-").concat(fighter.account); // if a fighter is dead, don't display it
@@ -678,7 +698,9 @@ var loadFightersFromServer = function loadFightersFromServer() {
         fighters: data.fighters,
         revivals: revivalData.revivals,
         csrf: csrf
-      }), document.querySelector("#content"));
+      }), document.querySelector("#content")); // set up materialize elements
+
+      $('.dropdown-trigger').dropdown();
     });
   });
 };
@@ -749,7 +771,6 @@ var setupStorePage = function setupStorePage(csrf) {
   }), document.querySelector("#content")); // get diamonds
 
   sendAjax('GET', '/getRevivals', null, function (data) {
-    console.dir(data.revivals);
     ReactDOM.render( /*#__PURE__*/React.createElement(StorePage, {
       csrf: csrf,
       revivals: data.revivals
