@@ -17,7 +17,8 @@ const sassTask = (done) => {
 };
 
 const bundleTask = (done) => {
-  gulp.src(['./client/app/maker.js', './client/helper/helper.js'])
+  // gulp.src(['./client/app/maker.js', './client/helper/helper.js'])
+  gulp.src(['./client/app/*.js', './client/helper/helper.js', ])
   .pipe(babel({
     presets: ['@babel/preset-env', '@babel/preset-react']
   }))

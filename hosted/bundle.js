@@ -1,159 +1,6 @@
 "use strict";
 
-/// sends request to create fighter
-var handleFighter = function handleFighter(e) {
-  e.preventDefault();
-  var sliders = getSliders(); // thought it was confusing enough to warrant its own error message ("wait but I set everything!")
-
-  if (sliders.name == '') {
-    sendToast('Fighter Name is required');
-    return false;
-  }
-
-  if (sliders.health == '' || sliders.damage == '' || sliders.speed == '' || sliders.armor == '' || sliders.crit == '') {
-    sendToast('All stats are required');
-    return false;
-  }
-
-  sendAjax('POST', $("#fighterForm").attr("action"), $("#fighterForm").serialize(), function () {
-    // loadFightersFromServer();
-    // TODO: Show a success window and reset forms
-    sendToast('Fighter created successfully');
-    resetForm();
-  });
-  return false;
-}; /// called by the delete html button
-
-
-var handleDeleteClick = function handleDeleteClick(e) {
-  DeleteFighter(e);
-}; /// sends a delete request to the server
-
-
-var DeleteFighter = function DeleteFighter(e) {
-  var csrfToken = $("#_csrf").val();
-  var currentFighter = {
-    name: e.target.name,
-    _csrf: csrfToken
-  };
-  sendAjax('POST', '/deleteFighter', currentFighter, function () {
-    loadFightersFromServer();
-  });
-}; /// Create a fighter React page
-
-
-var FighterForm = function FighterForm(props) {
-  return /*#__PURE__*/React.createElement("form", {
-    id: "fighterForm",
-    onSubmit: handleFighter,
-    name: "fighterForm",
-    action: "/maker",
-    method: "POST",
-    className: "fighterForm"
-  }, /*#__PURE__*/React.createElement("div", {
-    className: "row"
-  }, /*#__PURE__*/React.createElement("div", {
-    className: "input-field col s12"
-  }, /*#__PURE__*/React.createElement("input", {
-    id: "fighterName",
-    type: "text",
-    name: "name"
-  }), /*#__PURE__*/React.createElement("label", {
-    "for": "name"
-  }, "Fighter Name")), /*#__PURE__*/React.createElement("div", {
-    className: "input-field col s4"
-  }, /*#__PURE__*/React.createElement("p", {
-    className: "range-field"
-  }, /*#__PURE__*/React.createElement("label", {
-    "for": "health"
-  }, /*#__PURE__*/React.createElement("input", {
-    type: "range",
-    id: "fighterHealth",
-    name: "health",
-    min: "1",
-    max: "15"
-  }), "Health"))), /*#__PURE__*/React.createElement("div", {
-    className: "input-field col s4"
-  }, /*#__PURE__*/React.createElement("p", {
-    className: "range-field"
-  }, /*#__PURE__*/React.createElement("label", {
-    "for": "damage"
-  }, /*#__PURE__*/React.createElement("input", {
-    type: "range",
-    id: "fighterDamage",
-    name: "damage",
-    min: "1",
-    max: "15"
-  }), "Damage"))), /*#__PURE__*/React.createElement("div", {
-    className: "input-field col s4"
-  }, /*#__PURE__*/React.createElement("p", {
-    className: "range-field"
-  }, /*#__PURE__*/React.createElement("label", {
-    "for": "speed"
-  }, /*#__PURE__*/React.createElement("input", {
-    type: "range",
-    id: "fighterSpeed",
-    name: "speed",
-    min: "1",
-    max: "15"
-  }), "Speed"))), /*#__PURE__*/React.createElement("div", {
-    className: "input-field col s4"
-  }, /*#__PURE__*/React.createElement("p", {
-    className: "range-field"
-  }, /*#__PURE__*/React.createElement("label", {
-    "for": "armor"
-  }, /*#__PURE__*/React.createElement("input", {
-    type: "range",
-    id: "fighterArmor",
-    name: "armor",
-    min: "1",
-    max: "15"
-  }), "Armor"))), /*#__PURE__*/React.createElement("div", {
-    className: "input-field col s4"
-  }, /*#__PURE__*/React.createElement("p", {
-    className: "range-field"
-  }, /*#__PURE__*/React.createElement("label", {
-    "for": "crit"
-  }, /*#__PURE__*/React.createElement("input", {
-    type: "range",
-    id: "fighterCrit",
-    name: "crit",
-    min: "1",
-    max: "15"
-  }), "Crit"))), /*#__PURE__*/React.createElement("div", {
-    className: "input-field col s4"
-  }, /*#__PURE__*/React.createElement("h6", {
-    id: "pointsField"
-  }, "Points Left: 31"))), /*#__PURE__*/React.createElement("input", {
-    type: "hidden",
-    id: "_csrf",
-    name: "_csrf",
-    value: props.csrf
-  }), /*#__PURE__*/React.createElement("input", {
-    className: "waves-effect waves-purple btn",
-    type: "submit",
-    value: "Create Fighter"
-  }));
-}; /// Page to render while the AJAX call comes back
-
-
-var LoadingPage = function LoadingPage(props) {
-  return /*#__PURE__*/React.createElement("form", {
-    id: "loadingForm",
-    name: "loadingForm"
-  }, /*#__PURE__*/React.createElement("div", {
-    className: "progress"
-  }, /*#__PURE__*/React.createElement("div", {
-    className: "indeterminate"
-  })), /*#__PURE__*/React.createElement("input", {
-    type: "hidden",
-    id: "_csrf",
-    name: "_csrf",
-    value: props.csrf
-  }));
-}; /// React page for change password page
-
-
+/// React page for change password page
 var ChangePassForm = function ChangePassForm(props) {
   return /*#__PURE__*/React.createElement("form", {
     id: "changePassForm",
@@ -375,6 +222,226 @@ var increaseMaxFighters = function increaseMaxFighters(e) {
   var csrf = $("#_csrf").val();
   sendAjax('POST', $("#accountForm").attr("action"), "numFighters=1&_csrf=".concat(csrf), redirect);
   return false;
+};
+
+var DiamondIcon = function DiamondIcon(props) {
+  return /*#__PURE__*/React.createElement("div", {
+    className: "collection",
+    id: "diamondCollection"
+  }, /*#__PURE__*/React.createElement("a", {
+    className: "collection-item soft-violet",
+    type: "submit",
+    onClick: setupBuyDiamondsPage
+  }, /*#__PURE__*/React.createElement("img", {
+    id: "diamondImg",
+    src: "/assets/img/diamondIcon.png"
+  }), /*#__PURE__*/React.createElement("p", {
+    id: "diamondText"
+  }, props.diamonds), /*#__PURE__*/React.createElement("i", {
+    className: "material-icons",
+    id: "addDiamondsBtn"
+  }, "add")));
+}; /// renders the change password page
+
+
+var setupChangePassPage = function setupChangePassPage(csrf) {
+  ReactDOM.render( /*#__PURE__*/React.createElement(ChangePassForm, {
+    csrf: csrf
+  }), document.querySelector("#content"));
+  updateUrl('/changePass');
+}; /// renders the store page
+
+
+var setupStorePage = function setupStorePage(csrf) {
+  // render the loading page before we ask the server for our items
+  ReactDOM.render( /*#__PURE__*/React.createElement(StorePage, {
+    csrf: csrf
+  }), document.querySelector("#content")); // get diamonds
+
+  sendAjax('GET', '/getRevivals', null, function (data) {
+    ReactDOM.render( /*#__PURE__*/React.createElement(StorePage, {
+      csrf: csrf,
+      revivals: data.revivals
+    }), document.querySelector("#content"));
+  });
+  updateUrl('/store');
+};
+
+var setupAccountPage = function setupAccountPage(csrf) {
+  ReactDOM.render( /*#__PURE__*/React.createElement(LoadingPage, {
+    csrf: csrf
+  }), document.querySelector("#content")); // get current number of fighters
+
+  sendAjax('GET', '/getMaxFighters', null, function (result) {
+    ReactDOM.render( /*#__PURE__*/React.createElement(AccountForm, {
+      csrf: csrf,
+      maxFighters: result.maxFighters
+    }), document.querySelector("#content")); // initialize materialize elements
+    // $('.collapsible').collapsible();
+  });
+  updateUrl('/account');
+};
+
+var setupBuyDiamondsPage = function setupBuyDiamondsPage(csrf) {
+  csrf = $("#_csrf").val();
+  ReactDOM.render( /*#__PURE__*/React.createElement(BuyDiamondsPage, {
+    csrf: csrf
+  }), document.querySelector("#content"));
+  updateUrl('/buyDiamonds', setupBuyDiamondsPage);
+};
+"use strict";
+
+/// sends request to create fighter
+var handleFighter = function handleFighter(e) {
+  e.preventDefault();
+  var sliders = getSliders(); // thought it was confusing enough to warrant its own error message ("wait but I set everything!")
+
+  if (sliders.name == '') {
+    sendToast('Fighter Name is required');
+    return false;
+  }
+
+  if (sliders.health == '' || sliders.damage == '' || sliders.speed == '' || sliders.armor == '' || sliders.crit == '') {
+    sendToast('All stats are required');
+    return false;
+  }
+
+  sendAjax('POST', $("#fighterForm").attr("action"), $("#fighterForm").serialize(), function () {
+    // loadFightersFromServer();
+    // TODO: Show a success window and reset forms
+    sendToast('Fighter created successfully');
+    resetForm();
+  });
+  return false;
+}; /// called by the delete html button
+
+
+var handleDeleteClick = function handleDeleteClick(e) {
+  DeleteFighter(e);
+}; /// sends a delete request to the server
+
+
+var DeleteFighter = function DeleteFighter(e) {
+  var csrfToken = $("#_csrf").val();
+  var currentFighter = {
+    name: e.target.name,
+    _csrf: csrfToken
+  };
+  sendAjax('POST', '/deleteFighter', currentFighter, function () {
+    loadFightersFromServer();
+  });
+}; /// Create a fighter React page
+
+
+var FighterForm = function FighterForm(props) {
+  return /*#__PURE__*/React.createElement("form", {
+    id: "fighterForm",
+    onSubmit: handleFighter,
+    name: "fighterForm",
+    action: "/maker",
+    method: "POST",
+    className: "fighterForm"
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "row"
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "input-field col s12"
+  }, /*#__PURE__*/React.createElement("input", {
+    id: "fighterName",
+    type: "text",
+    name: "name"
+  }), /*#__PURE__*/React.createElement("label", {
+    "for": "name"
+  }, "Fighter Name")), /*#__PURE__*/React.createElement("div", {
+    className: "input-field col s4"
+  }, /*#__PURE__*/React.createElement("p", {
+    className: "range-field"
+  }, /*#__PURE__*/React.createElement("label", {
+    "for": "health"
+  }, /*#__PURE__*/React.createElement("input", {
+    type: "range",
+    id: "fighterHealth",
+    name: "health",
+    min: "1",
+    max: "15"
+  }), "Health"))), /*#__PURE__*/React.createElement("div", {
+    className: "input-field col s4"
+  }, /*#__PURE__*/React.createElement("p", {
+    className: "range-field"
+  }, /*#__PURE__*/React.createElement("label", {
+    "for": "damage"
+  }, /*#__PURE__*/React.createElement("input", {
+    type: "range",
+    id: "fighterDamage",
+    name: "damage",
+    min: "1",
+    max: "15"
+  }), "Damage"))), /*#__PURE__*/React.createElement("div", {
+    className: "input-field col s4"
+  }, /*#__PURE__*/React.createElement("p", {
+    className: "range-field"
+  }, /*#__PURE__*/React.createElement("label", {
+    "for": "speed"
+  }, /*#__PURE__*/React.createElement("input", {
+    type: "range",
+    id: "fighterSpeed",
+    name: "speed",
+    min: "1",
+    max: "15"
+  }), "Speed"))), /*#__PURE__*/React.createElement("div", {
+    className: "input-field col s4"
+  }, /*#__PURE__*/React.createElement("p", {
+    className: "range-field"
+  }, /*#__PURE__*/React.createElement("label", {
+    "for": "armor"
+  }, /*#__PURE__*/React.createElement("input", {
+    type: "range",
+    id: "fighterArmor",
+    name: "armor",
+    min: "1",
+    max: "15"
+  }), "Armor"))), /*#__PURE__*/React.createElement("div", {
+    className: "input-field col s4"
+  }, /*#__PURE__*/React.createElement("p", {
+    className: "range-field"
+  }, /*#__PURE__*/React.createElement("label", {
+    "for": "crit"
+  }, /*#__PURE__*/React.createElement("input", {
+    type: "range",
+    id: "fighterCrit",
+    name: "crit",
+    min: "1",
+    max: "15"
+  }), "Crit"))), /*#__PURE__*/React.createElement("div", {
+    className: "input-field col s4"
+  }, /*#__PURE__*/React.createElement("h6", {
+    id: "pointsField"
+  }, "Points Left: 31"))), /*#__PURE__*/React.createElement("input", {
+    type: "hidden",
+    id: "_csrf",
+    name: "_csrf",
+    value: props.csrf
+  }), /*#__PURE__*/React.createElement("input", {
+    className: "waves-effect waves-purple btn",
+    type: "submit",
+    value: "Create Fighter"
+  }));
+}; /// Page to render while the AJAX call comes back
+
+
+var LoadingPage = function LoadingPage(props) {
+  return /*#__PURE__*/React.createElement("form", {
+    id: "loadingForm",
+    name: "loadingForm"
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "progress"
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "indeterminate"
+  })), /*#__PURE__*/React.createElement("input", {
+    type: "hidden",
+    id: "_csrf",
+    name: "_csrf",
+    value: props.csrf
+  }));
 };
 
 var startFight = function startFight(e) {
@@ -601,12 +668,10 @@ var AllFighterList = function AllFighterList(props) {
       onClick: startFight
     }, itemName));
   });
-  var i = 0;
   var fighterNodes = props.fighters.map(function (fighter) {
     // have to use some sort of iterator to key each dropdown lists ids, otherwise some dropdowns
     // might refer to a random different dropdown
-    i++;
-    var dropdownId = "dropdown".concat(i, "-").concat(fighter.account);
+    var dropdownId = "dropdown".concat(fighter._id, "-").concat(fighter.account);
     var title = "".concat(fighter.name, "-").concat(fighter.account);
     var logId = "log".concat(fighter._id, "-").concat(fighter.account); // for setting up each card as a modal
 
@@ -719,14 +784,6 @@ var loadAllFightersFromServer = function loadAllFightersFromServer() {
       $('.modal').modal();
     });
   });
-}; /// renders the change password page
-
-
-var setupChangePassPage = function setupChangePassPage(csrf) {
-  ReactDOM.render( /*#__PURE__*/React.createElement(ChangePassForm, {
-    csrf: csrf
-  }), document.querySelector("#content"));
-  updateUrl('/changePass');
 };
 
 var setupFightersPage = function setupFightersPage(csrf) {
@@ -761,45 +818,6 @@ var setupMakerPage = function setupMakerPage(csrf) {
 
   setupMaterializeElements();
   updateUrl('/createFighter');
-}; /// renders the store page
-
-
-var setupStorePage = function setupStorePage(csrf) {
-  // render the loading page before we ask the server for our items
-  ReactDOM.render( /*#__PURE__*/React.createElement(StorePage, {
-    csrf: csrf
-  }), document.querySelector("#content")); // get diamonds
-
-  sendAjax('GET', '/getRevivals', null, function (data) {
-    ReactDOM.render( /*#__PURE__*/React.createElement(StorePage, {
-      csrf: csrf,
-      revivals: data.revivals
-    }), document.querySelector("#content"));
-  });
-  updateUrl('/store');
-};
-
-var setupAccountPage = function setupAccountPage(csrf) {
-  ReactDOM.render( /*#__PURE__*/React.createElement(LoadingPage, {
-    csrf: csrf
-  }), document.querySelector("#content")); // get current number of fighters
-
-  sendAjax('GET', '/getMaxFighters', null, function (result) {
-    ReactDOM.render( /*#__PURE__*/React.createElement(AccountForm, {
-      csrf: csrf,
-      maxFighters: result.maxFighters
-    }), document.querySelector("#content")); // initialize materialize elements
-    // $('.collapsible').collapsible();
-  });
-  updateUrl('/account');
-};
-
-var setupBuyDiamondsPage = function setupBuyDiamondsPage(csrf) {
-  csrf = $("#_csrf").val();
-  ReactDOM.render( /*#__PURE__*/React.createElement(BuyDiamondsPage, {
-    csrf: csrf
-  }), document.querySelector("#content"));
-  updateUrl('/buyDiamonds', setupBuyDiamondsPage);
 };
 
 var setupBattleLogPage = function setupBattleLogPage(logs) {
@@ -808,9 +826,16 @@ var setupBattleLogPage = function setupBattleLogPage(logs) {
     csrf: csrf,
     logs: logs
   }), document.querySelector("#content"));
-}; /// sets up click events for the navigation buttons to re-render the page with react
+};
 
+var getMaxFighters = function getMaxFighters(callback) {
+  sendAjax('GET', '/getMaxFighters', null, function (result) {
+    return callback;
+  });
+};
+"use strict";
 
+/// sets up click events for the navigation buttons to re-render the page with react
 var setupNavButtons = function setupNavButtons(csrf) {
   var makerButton = document.querySelector("#makerButton"); // const changePassButton = document.querySelector("#changePassButton");
 
@@ -863,31 +888,6 @@ var getUsername = function getUsername() {
   sendAjax('GET', '/getUsername', null, function (result) {
     return result.username;
   });
-};
-
-var getMaxFighters = function getMaxFighters(callback) {
-  sendAjax('GET', '/getMaxFighters', null, function (result) {
-    return callback;
-  });
-};
-
-var DiamondIcon = function DiamondIcon(props) {
-  return /*#__PURE__*/React.createElement("div", {
-    className: "collection",
-    id: "diamondCollection"
-  }, /*#__PURE__*/React.createElement("a", {
-    className: "collection-item soft-violet",
-    type: "submit",
-    onClick: setupBuyDiamondsPage
-  }, /*#__PURE__*/React.createElement("img", {
-    id: "diamondImg",
-    src: "/assets/img/diamondIcon.png"
-  }), /*#__PURE__*/React.createElement("p", {
-    id: "diamondText"
-  }, props.diamonds), /*#__PURE__*/React.createElement("i", {
-    className: "material-icons",
-    id: "addDiamondsBtn"
-  }, "add")));
 };
 
 var setupIcons = function setupIcons() {
