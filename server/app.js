@@ -12,15 +12,15 @@ const url = require('url');
 const csrf = require('csurf');
 
 const port = process.env.PORT || process.env.NODE_PORT || 3000;
-const dbURL = process.env.MONGODB_URI || 'mongodb://localhost/Fighterz';
+const dbURL = process.env.MONGODB_URI || '***REMOVED***';
 
-const mongooseOptions = {
+/*const mongooseOptions = {
   useNewUrlParser: true,
   useUnifiedTopology: true,
   useCreateIndex: true,
-};
+};*/
 
-mongoose.connect(dbURL, mongooseOptions, (err) => {
+mongoose.connect(dbURL, /*mongooseOptions,*/ (err) => {
   if (err) {
     console.log('Could not connect to database');
     throw err;
